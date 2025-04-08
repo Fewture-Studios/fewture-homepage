@@ -1,3 +1,5 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities; 
+@tailwind utilities;
+
+@apply some-invalid-class-that-doesnt-exist; 

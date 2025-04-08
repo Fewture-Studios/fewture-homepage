@@ -68,7 +68,7 @@
 </head>
 <body>
     <div id="logo-container"> 
-        <img src="assets/images/Fewture-Studios-Typography.png" alt="Fewture Studios Logo">
+        <img src="./assets/images/Fewture-Studios-Typography.png" alt="Fewture Studios Logo">
     </div> 
     <div id="css2d-container"></div>
 
@@ -89,7 +89,7 @@
         import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'; 
         // Import GLTFLoader if you plan to load a custom model later
-        // import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
         // --- Core Setup ---
         let scene, camera, renderer, composer, clock, labelRenderer;
@@ -118,6 +118,12 @@
         const tempVector = new THREE.Vector3(); 
         const potentialPoints = []; 
         // --- End Flowing Lines Variables ---
+
+        // --- Info Labels ---
+        let infoLabelContent = [ // Defined globally so loader can access
+            { text: "Object: Custom Mesh", pos: new THREE.Vector3(3.8, 2.0, 0) }, // Adjusted text
+            { text: "Status: Loading...", pos: new THREE.Vector3(-3.8, 1.0, 0) }, // Initial status
+        ];
 
         function init() {
             // Scene
@@ -157,19 +163,14 @@
 
             // --- Central Object (Torus Knot or Loaded Model) ---
             
-            // Option 1: Procedural Torus Knot (Current)
-            createTorusKnot(); 
+            // Option 1: Procedural Torus Knot (Commented out)
+            // createTorusKnot(); 
             
-            // Option 2: Load external GLB/GLTF model (Uncomment to use)
-            // loadExternalModel('assets/models/your_mesh.glb'); 
+            // Option 2: Load external GLB/GLTF model (Uncommented and updated)
+            loadExternalModel('assets/models/mesh.glb'); 
 
             // --- Add Basic Info Labels ---
-             const infoLabelContent = [
-                 { text: "Object: TorusKnot", pos: new THREE.Vector3(3.8, 2.0, 0) }, // Adjust text if loading model
-                 { text: "Status: Stable", pos: new THREE.Vector3(-3.8, 1.0, 0) },
-             ];
-             // Attach labels after centralObject is created/loaded
-             // We'll attach them inside createTorusKnot or the loader callback
+             // Labels are now attached inside the model loader callback
 
             // --- Animated Floor Plane --- 
             const planeSize = 60;
@@ -245,7 +246,7 @@
             }
         }
         
-        // --- Function to create Torus Knot ---
+        // --- Function to create Torus Knot (Keep for reference, but not called) ---
         function createTorusKnot() {
             const geometry = new THREE.TorusKnotGeometry(2.5, 0.6, 150, 20); 
             vertexPositions = geometry.attributes.position; 
@@ -266,91 +267,98 @@
             centralObject.add(wireframeObject); 
 
             // Attach labels and position debris relative to the created object
-            attachLabels();
+            attachInfoLabels(centralObject);
             positionDebris();
         }
 
-        // --- Function to load external model (Example) ---
-        /*
+        // --- Function to Load External Model ---
         function loadExternalModel(modelPath) {
             const loader = new GLTFLoader();
-            loader.load(modelPath, (gltf) => {
-                centralObject = gltf.scene;
-                
-                // --- Process loaded model (apply materials, scale, center etc.) ---
-                centralObject.traverse((child) => {
-                    if (child.isMesh) {
-                         // Example: Apply a basic material if none exists
-                         if (!child.material) {
-                              child.material = new THREE.MeshStandardMaterial({ color: 0x555555 });
+            loader.load(
+                modelPath,
+                function (gltf) { // Success callback
+                    centralObject = gltf.scene;
+                    
+                    // --- Center and Scale Loaded Model --- START ---
+                    const box = new THREE.Box3().setFromObject(centralObject);
+                    const size = box.getSize(new THREE.Vector3());
+                    const center = box.getCenter(new THREE.Vector3());
+
+                    const maxSize = Math.max(size.x, size.y, size.z);
+                    const desiredSize = 4.0; // Target size for the largest dimension
+                    const scale = desiredSize / maxSize;
+
+                    console.log(`Original model size: x=${size.x.toFixed(2)}, y=${size.y.toFixed(2)}, z=${size.z.toFixed(2)}`);
+                    console.log(`Calculated scale: ${scale.toFixed(2)}`);
+
+                    centralObject.scale.multiplyScalar(scale);
+                    centralObject.position.sub(center.multiplyScalar(scale)); // Center after scaling
+                    // Optional: Adjust final position slightly if needed
+                    // centralObject.position.y += 1.0; 
+                    // --- Center and Scale Loaded Model --- END ---
+
+                    scene.add(centralObject);
+
+                    // Update wireframe reference if needed (might need adjustment based on model structure)
+                    const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.2 });
+                    centralObject.traverse((child) => {
+                         if (child.isMesh) {
+                             wireframeObject = new THREE.Mesh(child.geometry, wireframeMaterial);
+                             wireframeObject.position.copy(child.position);
+                             wireframeObject.rotation.copy(child.rotation);
+                             wireframeObject.scale.copy(child.scale);
+                             // Don't add wireframe to scene directly, just keep reference or add conditionally
                          }
-                         // Store vertex data if needed for effects (might need merging geometries)
-                         // vertexPositions = child.geometry.attributes.position; // Simplified example
-                         // vertexCount = vertexPositions.count; 
+                     });
+
+                    // Update debris position relative to loaded model (optional)
+                    if (debrisGroup && centralObject) {
+                         debrisGroup.position.copy(centralObject.position);
                     }
-                });
-                
-                // Example: Scale and center model
-                const box = new THREE.Box3().setFromObject(centralObject);
-                const center = box.getCenter(new THREE.Vector3());
-                const size = box.getSize(new THREE.Vector3());
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 4.0 / maxDim; // Scale to roughly fit
-                centralObject.scale.multiplyScalar(scale);
-                centralObject.position.sub(center.multiplyScalar(scale)); // Center after scaling
-                centralObject.position.y = 2; // Adjust final height
-                
-                scene.add(centralObject);
 
-                // --- Create wireframe for loaded model (more complex) ---
-                // Option A: Use EdgesGeometry (simpler, less robust)
-                // const edges = new THREE.EdgesGeometry( child.geometry ); // Apply to each mesh's geometry
-                // wireframeObject = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.4 } ) );
-                // wireframeObject.scale.copy(centralObject.scale); // Match scale
-                // centralObject.add( wireframeObject ); // Add as child? Or position separately?
-                
-                // Option B: Create separate wireframe material meshes (better control but more work)
-                // Requires iterating through meshes, cloning geometry, applying wireframe material
+                    // Update status label and attach all labels
+                    const statusLabelData = infoLabelContent.find(l => l.text.startsWith("Status:"));
+                    if (statusLabelData) statusLabelData.text = "Status: Stable";
+                    attachInfoLabels(centralObject); 
 
-                console.log('Model loaded successfully');
-                
-                // Attach labels and position debris relative to the loaded object
-                attachLabels();
-                positionDebris();
-
-            }, undefined, (error) => {
-                console.error('Error loading model:', error);
-                // Fallback to procedural shape if loading fails
-                createTorusKnot(); 
-            });
+                    console.log('Model loaded successfully.');
+                     // Trigger initial animation updates if needed
+                     lastFlowLineUpdateTime = clock.getElapsedTime(); // Reset timer if flow lines depend on model
+                     // updateFlowLines(); // Generate initial lines based on loaded model - COMMENTED OUT
+                },
+                undefined, // Progress callback (optional)
+                function (error) { // Error callback
+                    console.error('An error happened loading the model:', error);
+                     const statusLabelData = infoLabelContent.find(l => l.text.startsWith("Status:"));
+                    if (statusLabelData) statusLabelData.text = "Status: Error Loading";
+                    // Maybe create a fallback object?
+                    // createTorusKnot(); // Or create the fallback torus knot
+                }
+            );
         }
-        */
 
-        // --- Function to attach labels ---
-        function attachLabels() {
-            if (!centralObject) return; // Wait until object exists
-             const infoLabelContent = [
-                 // Adjust text if using loaded model
-                 { text: centralObject.geometry.type === 'TorusKnotGeometry' ? "Object: TorusKnot" : "Object: Loaded Mesh", pos: new THREE.Vector3(3.8, 2.0, 0) },
-                 { text: "Status: Stable", pos: new THREE.Vector3(-3.8, 1.0, 0) },
-             ];
-             infoLabelContent.forEach(info => { 
-                 const labelDiv = document.createElement('div');
-                 labelDiv.className = 'info-label'; 
-                 labelDiv.textContent = info.text; 
-                 const label = new CSS2DObject(labelDiv);
-                 label.position.copy(info.pos); 
-                 centralObject.add(label); 
+        // --- Function to Attach CSS2D Info Labels ---
+        function attachInfoLabels(targetObject) {
+             if (!targetObject) return;
+             // Clear existing labels first? Optional, depends on desired behavior.
+             // targetObject.children.filter(child => child.isCSS2DObject).forEach(label => targetObject.remove(label));
+
+             infoLabelContent.forEach(info => {
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'info-label';
+                labelDiv.textContent = info.text;
+                const label = new CSS2DObject(labelDiv);
+                label.position.copy(info.pos); 
+                targetObject.add(label); 
              });
         }
-        
+
         // --- Function to position debris ---
         function positionDebris() {
              if (debrisGroup && centralObject) {
                  debrisGroup.position.copy(centralObject.position);
              }
         }
-
 
         // --- Helper Function for Particles ---
         function createParticles(count, baseColorHex, size, opacity, speedFactor) { /* ... (no changes) ... */ 
