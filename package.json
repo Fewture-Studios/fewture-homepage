@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node ./node_modules/tailwindcss/dist/lib.js -i ./src/input.css -o ./dist/output.css && cpy assets/** ./dist/assets && cpy index.html ./dist",
+    "build": "node ./node_modules/tailwindcss/dist/lib.js -i ./src/input.css -o ./dist/output.css",
     "build:once": "node ./node_modules/tailwindcss/dist/lib.js -i ./src/input.css -o /Users/r/Desktop/00_code/fewture-homepage/dist/output.css"
   },
   "keywords": [],
