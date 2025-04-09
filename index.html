@@ -277,8 +277,8 @@
             loader.load(
                 modelPath,
                 function (gltf) { // Success callback
-                    centralObject = gltf.scene;
-                    
+                centralObject = gltf.scene;
+                
                     // --- Center and Scale Loaded Model --- START ---
                     const box = new THREE.Box3().setFromObject(centralObject);
                     const size = box.getSize(new THREE.Vector3());
@@ -301,8 +301,8 @@
 
                     // Update wireframe reference if needed (might need adjustment based on model structure)
                     const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.2 });
-                    centralObject.traverse((child) => {
-                         if (child.isMesh) {
+                centralObject.traverse((child) => {
+                    if (child.isMesh) {
                              wireframeObject = new THREE.Mesh(child.geometry, wireframeMaterial);
                              wireframeObject.position.copy(child.position);
                              wireframeObject.rotation.copy(child.rotation);
@@ -343,16 +343,16 @@
              // Clear existing labels first? Optional, depends on desired behavior.
              // targetObject.children.filter(child => child.isCSS2DObject).forEach(label => targetObject.remove(label));
 
-             infoLabelContent.forEach(info => {
-                const labelDiv = document.createElement('div');
-                labelDiv.className = 'info-label';
-                labelDiv.textContent = info.text;
-                const label = new CSS2DObject(labelDiv);
-                label.position.copy(info.pos); 
+             infoLabelContent.forEach(info => { 
+                 const labelDiv = document.createElement('div');
+                 labelDiv.className = 'info-label'; 
+                 labelDiv.textContent = info.text; 
+                 const label = new CSS2DObject(labelDiv);
+                 label.position.copy(info.pos); 
                 targetObject.add(label); 
              });
         }
-
+        
         // --- Function to position debris ---
         function positionDebris() {
              if (debrisGroup && centralObject) {
