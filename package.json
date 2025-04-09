@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node ./node_modules/tailwindcss/dist/lib.js -i ./src/input.css -o /Users/r/Desktop/00_code/fewture-homepage/dist/output.css --watch",
+    "build": "node ./node_modules/tailwindcss/dist/lib.js -i ./src/input.css -o ./dist/output.css && cpy assets/** ./dist/assets && cpy index.html ./dist",
     "build:once": "node ./node_modules/tailwindcss/dist/lib.js -i ./src/input.css -o /Users/r/Desktop/00_code/fewture-homepage/dist/output.css"
   },
   "keywords": [],
@@ -13,6 +13,7 @@
   "description": "",
   "devDependencies": {
     "autoprefixer": "^10.4.21",
+    "cpy-cli": "^5.0.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.3"
   }
