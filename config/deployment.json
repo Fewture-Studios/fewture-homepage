@@ -1,0 +1,33 @@
+{
+  "project": {
+    "name": "fewture-homepage",
+    "version": "1.0.0",
+    "description": "Fewture Studios homepage with OpenAI chat integration"
+  },
+  "aws": {
+    "region": "us-east-1",
+    "lambda": {
+      "functionName": "fewture-chat-bot",
+      "runtime": "python3.11",
+      "timeout": 30,
+      "memorySize": 256
+    },
+    "apiGateway": {
+      "apiName": "fewture-chat-api",
+      "stageName": "prod",
+      "corsEnabled": true
+    }
+  },
+  "openai": {
+    "model": "gpt-3.5-turbo",
+    "maxTokens": 150,
+    "temperature": 0.7
+  },
+  "frontend": {
+    "chatContainer": {
+      "position": "bottom-left",
+      "width": "320px",
+      "height": "240px"
+    }
+  }
+}

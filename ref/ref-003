@@ -1,0 +1,420 @@
+# Create a stylized, Myst-inspired static website scaffold and a mock screenshot.
+import os, textwrap, json, shutil
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+root = "/mnt/data/future_studios_site"
+assets = f"{root}/assets"
+os.makedirs(assets, exist_ok=True)
+
+# ----------------------
+# Create index.html
+# ----------------------
+index_html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Future Studios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="fog-layer fog-1"></div>
+  <div class="fog-layer fog-2"></div>
+  <div class="fog-layer fog-3"></div>
+
+  <header class="nav">
+    <div class="brand">
+      <img src="assets/glyph.png" alt="glyph" class="glyph"/>
+      <div class="brand-text">
+        <div class="brand-title">Future Studios</div>
+        <div class="brand-sub">a creator-native studio</div>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="home">Home</button>
+      <button class="tab" data-tab="about">About</button>
+      <button class="tab" data-tab="team">Team</button>
+      <button class="tab" data-tab="contact">Contact</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- HERO with giant video -->
+    <section class="hero" id="hero">
+      <div class="hero-overlay"></div>
+      <video class="hero-video" controls poster="assets/hero_poster.jpg">
+        <source src="assets/hero_sample.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <div class="hero-copy">
+        <h1>Stories from the Edge of the Map</h1>
+        <p>Immersive worlds. Creator-powered distribution. Built for now.</p>
+        <div class="cta-row">
+          <a class="cta" href="#" onclick="switchTab('about');return false;">What we do</a>
+          <a class="cta ghost" href="#" onclick="switchTab('contact');return false;">Start a project</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANELS -->
+    <section class="panel active" id="home">
+      <div class="grid">
+        <div class="card">
+          <h3>Original IP</h3>
+          <p>We develop and produce franchises across sports, music, and film—optimized for creator-first distribution.</p>
+        </div>
+        <div class="card">
+          <h3>Creator Airtime</h3>
+          <p>We program premium content into the largest creator channels on the planet and aggregate the reach.</p>
+        </div>
+        <div class="card">
+          <h3>Rights & Licensing</h3>
+          <p>We acquire, package, and distribute rights—bringing overlooked leagues and cultural events to new audiences.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="about">
+      <div class="copy">
+        <h2>About</h2>
+        <p>Future Studios is an internet-native studio rooted in youth culture. We partner with talent and brands to create premium IP, then distribute it through a creator network that functions like a decentralized broadcaster. Think early-2000s adventure atmosphere, rebuilt for today’s attention economy.</p>
+        <p>We combine old-school craft with new-school pipes—own the rights, partner with the talent, master the distribution.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="team">
+      <div class="team-grid">
+        <div class="member">
+          <img src="assets/portrait1.jpg" alt="Team member"/>
+          <h4>Kai Henry</h4>
+          <p>Creative Director & Co-Founder</p>
+        </div>
+        <div class="member">
+          <img src="assets/portrait2.jpg" alt="Team member"/>
+          <h4>Producer A</h4>
+          <p>Head of Production</p>
+        </div>
+        <div class="member">
+          <img src="assets/portrait3.jpg" alt="Team member"/>
+          <h4>Producer B</h4>
+          <p>Head of Post / VFX</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="contact">
+      <div class="copy">
+        <h2>Contact</h2>
+        <form class="contact-form" onsubmit="event.preventDefault(); alert('Thanks — we’ll be in touch.');">
+          <div class="row">
+            <div class="field">
+              <label>Name</label>
+              <input type="text" placeholder="Your name"/>
+            </div>
+            <div class="field">
+              <label>Email</label>
+              <input type="email" placeholder="you@studio.com"/>
+            </div>
+          </div>
+          <div class="field">
+            <label>Message</label>
+            <textarea rows="5" placeholder="Tell us about your project…"></textarea>
+          </div>
+          <button class="cta" type="submit">Send</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© Future Studios</span>
+    <span class="sep">•</span>
+    <a href="#" onclick="switchTab('contact');return false;">Work with us</a>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
+"""
+
+# ----------------------
+# Create styles.css
+# ----------------------
+styles_css = """
+:root {
+  --bg: #0c0f12;
+  --panel: #11151a;
+  --ink: #ecf0f1;
+  --muted: #a1aebf;
+  --accent: #c1ffea;
+  --accent2: #7fb7ff;
+  --gold: #d1b27b;
+  --line: #222933;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: radial-gradient(1200px 800px at 70% -10%, rgba(127,183,255,0.08), transparent),
+              radial-gradient(800px 600px at 20% -10%, rgba(193,255,234,0.07), transparent),
+              var(--bg) url('assets/stone_noise.png');
+  color: var(--ink);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Fog layers (animated) */
+.fog-layer {
+  position: fixed; inset: -10% -10% auto -10%;
+  height: 60vh;
+  background: url('assets/fog.png') repeat-x;
+  opacity: .25;
+  filter: blur(2px);
+  animation: drift 60s linear infinite;
+  pointer-events: none;
+}
+.fog-2 { top: 10vh; opacity: .18; animation-duration: 90s; transform: scaleX(-1); }
+.fog-3 { top: 20vh; opacity: .12; animation-duration: 120s; }
+@keyframes drift { 0% { background-position: 0 0; } 100% { background-position: 2000px 0; } }
+
+/* Nav */
+.nav {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 22px; background: rgba(17,21,26,0.75);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; gap: 12px; align-items: center; }
+.glyph { width: 34px; height: 34px; image-rendering: pixelated; }
+.brand-title { font-family: Cinzel, serif; font-weight: 800; letter-spacing: .5px; }
+.brand-sub { color: var(--muted); font-size: 12px; margin-top: -4px; }
+
+.tabs { display: flex; gap: 8px; }
+.tab {
+  background: transparent; border: 1px solid var(--line);
+  color: var(--muted); padding: 8px 12px; border-radius: 8px; cursor: pointer;
+  font-weight: 600; letter-spacing: .3px;
+}
+.tab.active, .tab:hover { color: var(--ink); border-color: #2e3846; }
+
+/* Hero */
+.hero {
+  position: relative; padding: 12px 22px 0; max-width: 1260px; margin: 0 auto;
+}
+.hero-video {
+  width: 100%; height: clamp(300px, 55vw, 560px);
+  background: #000; border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.5);
+}
+.hero-overlay {
+  position: absolute; inset: 0 22px auto 22px; height: 40px;
+  background: linear-gradient(180deg, rgba(12,15,18,0.8), transparent);
+  border-radius: 14px 14px 0 0;
+  pointer-events: none;
+}
+.hero-copy {
+  position: relative; margin-top: 14px; padding: 12px 6px 0; max-width: 960px;
+}
+.hero-copy h1 {
+  margin: 0 0 6px; font-family: Cinzel, serif; font-weight: 800; letter-spacing: .5px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero-copy p { color: var(--muted); margin: 4px 0 12px; }
+.cta-row { display: flex; gap: 10px; }
+.cta {
+  display: inline-block; text-decoration: none; color: #0c0f12; font-weight: 800;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  padding: 10px 14px; border-radius: 10px; border: 0;
+}
+.cta.ghost {
+  background: transparent; color: var(--ink); border: 1px solid var(--line);
+}
+
+/* Panels */
+.panel { display: none; max-width: 1260px; margin: 24px auto; padding: 0 22px 22px; }
+.panel.active { display: block; }
+.grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+.card {
+  background: rgba(17,21,26,.7); border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.02), 0 10px 30px rgba(0,0,0,.3);
+}
+.card h3 { font-family: Cinzel, serif; margin-top: 0; }
+.copy { max-width: 900px; }
+
+/* Team */
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.member {
+  background: rgba(17,21,26,.7); border: 1px solid var(--line); border-radius: 12px; padding: 14px; text-align: center;
+}
+.member img { width: 100%; height: 220px; object-fit: cover; border-radius: 10px; border: 1px solid #2e3846; }
+.member h4 { margin: 10px 0 6px; font-family: Cinzel, serif; }
+.member p { margin: 0; color: var(--muted); }
+
+/* Contact */
+.contact-form { max-width: 900px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: grid; gap: 6px; margin-bottom: 12px; }
+input, textarea {
+  background: #0b0f13; color: var(--ink); border: 1px solid var(--line);
+  padding: 10px 12px; border-radius: 8px; outline: none;
+}
+input:focus, textarea:focus { border-color: #324055; }
+
+/* Footer */
+.footer {
+  display: flex; gap: 10px; align-items: center; justify-content: center;
+  color: var(--muted); padding: 20px; border-top: 1px solid var(--line); margin-top: 30px;
+}
+.footer a { color: var(--ink); }
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+  .team-grid { grid-template-columns: 1fr; }
+  .row { grid-template-columns: 1fr; }
+}
+"""
+
+# ----------------------
+# Create script.js
+# ----------------------
+script_js = """
+function switchTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${id}"]`).classList.add('active');
+
+  // show hero only on home
+  const hero = document.getElementById('hero');
+  hero.style.display = (id === 'home') ? 'block' : 'none';
+}
+
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+"""
+
+# Write files
+with open(f"{root}/index.html", "w") as f: f.write(index_html)
+with open(f"{root}/styles.css", "w") as f: f.write(styles_css)
+with open(f"{root}/script.js", "w") as f: f.write(script_js)
+
+# ----------------------
+# Create assets (textures, fog, poster, portraits, glyph)
+# ----------------------
+# Stone noise
+img = Image.new("RGB", (1200, 800), (12, 15, 18))
+draw = ImageDraw.Draw(img)
+import random
+for _ in range(25000):
+    x = random.randint(0, 1199); y = random.randint(0, 799)
+    shade = random.randint(14, 28)
+    img.putpixel((x,y), (shade, shade+2, shade+6))
+img = img.filter(ImageFilter.GaussianBlur(radius=0.6))
+img.save(f"{assets}/stone_noise.png")
+
+# Fog tile
+fog = Image.new("RGBA", (800, 300), (0,0,0,0))
+fd = ImageDraw.Draw(fog)
+for i in range(30):
+    x0 = random.randint(-100, 700)
+    y0 = random.randint(20, 260)
+    r = random.randint(60, 140)
+    alpha = random.randint(20, 70)
+    ellipse = Image.new('L', (r*2, r*2), 0)
+    ImageDraw.Draw(ellipse).ellipse((0,0,r*2,r*2), fill=alpha)
+    fog.paste((255,255,255,alpha), (x0, y0), ellipse)
+fog = fog.filter(ImageFilter.GaussianBlur(6))
+fog.save(f"{assets}/fog.png")
+
+# Glyph icon (simple rune-like)
+g = Image.new("RGBA", (256, 256), (0,0,0,0))
+gd = ImageDraw.Draw(g)
+gd.ellipse((8,8,248,248), outline=(209,178,123,255), width=6)
+gd.line((128,26,128,230), fill=(209,178,123,255), width=5)
+gd.arc((38,38,218,218), start=30, end=150, fill=(193,255,234,255), width=6)
+g.save(f"{assets}/glyph.png")
+
+# Hero poster (foggy island vibe)
+poster = Image.new("RGB", (1600, 900), (10,14,18))
+pd = ImageDraw.Draw(poster)
+# horizon
+pd.rectangle([0, 500, 1600, 900], fill=(15,24,32))
+# island
+pd.polygon([(350,520),(600,460),(900,480),(1200,520),(1100,560),(500,560)], fill=(24,36,46))
+# towers
+pd.rectangle([680,360,710,480], fill=(38,56,70))
+pd.rectangle([820,370,845,480], fill=(38,56,70))
+# glow
+for r in range(0, 300, 6):
+    color = (127,183,255, max(0, 120 - r//3))
+    el = Image.new('RGBA', (1600,900), (0,0,0,0))
+    ImageDraw.Draw(el).ellipse((750-r, 420-r, 850+r, 520+r), fill=color)
+    poster = Image.alpha_composite(poster.convert('RGBA'), el).convert('RGB')
+poster = poster.filter(ImageFilter.GaussianBlur(1.2))
+poster.save(f"{assets}/hero_poster.jpg", quality=92)
+
+# Placeholder portraits
+for i, name in enumerate(["portrait1","portrait2","portrait3"], start=1):
+    p = Image.new("RGB", (800, 800), (16,20,26))
+    d = ImageDraw.Draw(p)
+    d.ellipse((120,120,680,680), fill=(30,38,48))
+    d.rectangle((350,520,450,700), fill=(40,50,60))
+    d.text((250,60), f"Portrait {i}", fill=(180,190,200))
+    p = p.filter(ImageFilter.GaussianBlur(0.5))
+    p.save(f"{assets}/{name}.jpg", quality=92)
+
+# Tiny silent MP4 placeholder (cannot encode video here). Create text file as placeholder note.
+with open(f"{assets}/hero_sample.mp4", "wb") as f:
+    f.write(b"")  # user can replace with real video
+
+# ----------------------
+# Create a mock "screenshot" of the site by compositing assets
+# ----------------------
+shot_w, shot_h = 1400, 900
+shot = Image.new("RGB", (shot_w, shot_h), (12,15,18))
+# top nav
+ImageDraw.Draw(shot).rectangle([0,0,shot_w,64], fill=(17,21,26))
+# brand
+ImageDraw.Draw(shot).text((84,18), "Future Studios", fill=(220,225,230))
+# tabs
+tabs = ["Home", "About", "Team", "Contact"]
+x = 1000
+for t in tabs:
+    ImageDraw.Draw(shot).rectangle([x,14,x+84,50], outline=(42,56,70))
+    ImageDraw.Draw(shot).text((x+16,24), t, fill=(180,190,200))
+    x += 96
+# hero
+poster_resized = Image.open(f"{assets}/hero_poster.jpg").resize((shot_w-80, 400))
+shot.paste(poster_resized, (40, 90))
+# hero copy
+d = ImageDraw.Draw(shot)
+d.text((60, 510), "Stories from the Edge of the Map", fill=(180, 240, 240))
+d.text((60, 540), "Immersive worlds. Creator-powered distribution. Built for now.", fill=(160,170,180))
+# cards
+card_y = 600
+for i, title in enumerate(["Original IP","Creator Airtime","Rights & Licensing"]):
+    x = 40 + i* ( (shot_w-100)//3 )
+    w = (shot_w-100)//3 - 20
+    ImageDraw.Draw(shot).rectangle([x, card_y, x+w, card_y+210], fill=(17,21,26), outline=(42,56,70))
+    ImageDraw.Draw(shot).text((x+16, card_y+16), title, fill=(220,225,230))
+    par = "Myst-like atmosphere meets modern distribution" if i==0 else ("Program premium content into creator channels" if i==1 else "Acquire, package, distribute rights")
+    ImageDraw.Draw(shot).text((x+16, card_y+48), par, fill=(160,170,180))
+# fog overlay
+fog_img = Image.open(f"{assets}/fog.png").resize((shot_w, 220))
+shot.paste(fog_img, (0, 80), fog_img)
+
+screenshot_path = "/mnt/data/future_studios_site_screenshot.png"
+shot.save(screenshot_path)
+
+# Zip up the site
+zip_path = shutil.make_archive("/mnt/data/future_studios_site", "zip", root)
+(screenshot_path, zip_path)

@@ -1,0 +1,31 @@
+version: 1
+backend:
+  phases:
+    build:
+      commands:
+        - echo "Backend build phase"
+        - cd backend
+        - pip install -r requirements.txt --target .
+        - zip -r ../lambda-deployment.zip . -x "*.pyc" "__pycache__/*"
+        - cd ..
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - echo "Installing dependencies"
+        - npm install
+    build:
+      commands:
+        - echo "Building frontend"
+        - echo "Frontend is static, no build needed"
+  artifacts:
+    baseDirectory: /
+    files:
+      - index.html
+      - assets/**/*
+      - package.json
+      - tailwind.config.js
+      - postcss.config.js
+  cache:
+    paths:
+      - node_modules/**/*

@@ -1,0 +1,368 @@
+# Create a scaffolded "FewtureOS" backend (FastAPI + pgvector) as a downloadable zip
+
+import os, json, textwrap, shutil, pathlib
+
+base = "/mnt/data/fewtureos"
+os.makedirs(base, exist_ok=True)
+os.makedirs(f"{base}/templates", exist_ok=True)
+
+# README
+readme = """# FewtureOS (Scaffold)
+A starter backend for **FewtureOS** — an internal, creator-native studio OS that:
+- Ingests writers' room + creative docs
+- Indexes with embeddings (pgvector)
+- Powers Retrieval-Augmented Generation (RAG) endpoints
+- Extracts and learns your *offer* (brand voice, pillars, do/don'ts)
+- Supports future fine-tuning dataset generation
+
+## Stack
+- FastAPI (API)
+- PostgreSQL + pgvector (vector search)
+- SQLAlchemy (ORM)
+- SentenceTransformers (embeddings) — swap for your preferred model/provider
+- (Optional) OpenAI/Anthropic/etc for generation — plug in your key in `.env`
+
+## Quick start
+1) Install Docker & Docker Compose.
+2) `cp .env.example .env` and fill values.
+3) `docker compose up -d` (starts Postgres with pgvector)
+4) Create venv and install deps: `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
+5) Run API: `uvicorn app:app --reload`
+
+## Endpoints (high-level)
+- POST `/ingest/text` — ingest raw text with metadata
+- POST `/ingest/document` — ingest a txt/markdown/pdf (extends to other types)
+- GET  `/search?q=...` — semantic search over your corpus
+- POST `/offer/extract` — builds a brand/offer profile from your corpus
+- POST `/generate` — RAG-backed generation with templates
+- POST `/train/build-dataset` — export instruction/output pairs for fine-tuning
+
+> This is a skeleton intended for customization. Wire your preferred LLM in `rag.py`.
+"""
+
+# requirements
+requirements = """fastapi==0.111.0
+uvicorn[standard]==0.30.1
+python-dotenv==1.0.1
+pydantic==2.8.2
+SQLAlchemy==2.0.31
+psycopg2-binary==2.9.9
+pgvector==0.2.5
+sentence-transformers==3.0.1
+numpy==1.26.4
+"""
+
+# docker-compose
+docker_compose = """version: "3.9"
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: fewtureos-db
+    environment:
+      POSTGRES_PASSWORD: fewture
+      POSTGRES_USER: fewture
+      POSTGRES_DB: fewtureos
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+volumes:
+  dbdata:
+"""
+
+# env example
+env_example = """# Database
+DATABASE_URL=postgresql+psycopg2://fewture:fewture@localhost:5432/fewtureos
+
+# Embeddings
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+
+# LLM (optional - uncomment as needed)
+# OPENAI_API_KEY=sk-...
+# ANTHROPIC_API_KEY=...
+"""
+
+# db.py
+db_py = """from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+import os
+
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://fewture:fewture@localhost:5432/fewtureos")
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+"""
+
+# models.py
+models_py = """from sqlalchemy import Column, Integer, String, Text, DateTime, JSON, Index
+from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import UUID, BYTEA
+from pgvector.sqlalchemy import Vector
+from db import Base
+
+class Document(Base):
+    __tablename__ = "documents"
+    id = Column(Integer, primary_key=True, index=True)
+    external_id = Column(String, index=True, nullable=True)
+    title = Column(String, nullable=True)
+    source = Column(String, nullable=True)  # e.g., 'writers_room', 'brief', 'script'
+    metadata = Column(JSON, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class Chunk(Base):
+    __tablename__ = "chunks"
+    id = Column(Integer, primary_key=True, index=True)
+    document_id = Column(Integer, index=True)
+    text = Column(Text, nullable=False)
+    embedding = Column(Vector(384))  # matches all-MiniLM-L6-v2 dims
+    metadata = Column(JSON, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+Index("ix_chunks_embedding", Chunk.embedding, postgresql_using="ivfflat")
+"""
+
+# schemas.py
+schemas_py = """from pydantic import BaseModel, Field
+from typing import Optional, List, Dict, Any
+
+class IngestTextRequest(BaseModel):
+    text: str
+    title: Optional[str] = None
+    source: Optional[str] = "writers_room"
+    metadata: Optional[Dict[str, Any]] = None
+    chunk_size: int = 1200
+    chunk_overlap: int = 200
+
+class SearchResponseItem(BaseModel):
+    chunk_id: int
+    document_id: int
+    score: float
+    text: str
+    metadata: Optional[Dict[str, Any]] = None
+
+class GenerateRequest(BaseModel):
+    query: str
+    template: Optional[str] = None
+    variables: Optional[Dict[str, Any]] = None
+    top_k: int = 5
+
+class OfferExtractRequest(BaseModel):
+    query: str = "Summarize Fewture's offer: positioning, pillars, tone, proof points."
+    top_k: int = 25
+
+class DatasetBuildRequest(BaseModel):
+    task: str = "press_release"  # or 'logline', 'treatment', etc.
+    top_k: int = 100
+"""
+
+# ingest.py
+ingest_py = """from typing import List, Dict
+from sqlalchemy.orm import Session
+from models import Document, Chunk
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+def _chunk_text(text: str, chunk_size=1200, chunk_overlap=200) -> List[str]:
+    chunks = []
+    i = 0
+    while i < len(text):
+        end = min(i + chunk_size, len(text))
+        chunks.append(text[i:end])
+        if end == len(text): break
+        i = end - chunk_overlap
+    return chunks
+
+def embed_texts(texts: List[str], model_name: str) -> List[List[float]]:
+    model = SentenceTransformer(model_name)
+    embs = model.encode(texts, normalize_embeddings=True)
+    return embs.tolist()
+
+def ingest_text(db: Session, text: str, title: str = None, source: str = None, metadata: Dict = None,
+                chunk_size: int = 1200, chunk_overlap: int = 200, embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"):
+    doc = Document(title=title, source=source, metadata=metadata or {})
+    db.add(doc)
+    db.commit()
+    db.refresh(doc)
+
+    chunks = _chunk_text(text, chunk_size, chunk_overlap)
+    embs = embed_texts(chunks, embedding_model)
+
+    for t, e in zip(chunks, embs):
+        c = Chunk(document_id=doc.id, text=t, embedding=e, metadata=metadata or {})
+        db.add(c)
+    db.commit()
+    return doc.id, len(chunks)
+"""
+
+# rag.py
+rag_py = """from typing import List, Dict, Any
+from sqlalchemy.orm import Session
+from sqlalchemy import text as sql_text
+from models import Chunk
+import os
+
+EMBEDDING_DIM = 384
+
+def search(db: Session, q_emb: List[float], top_k: int = 5):
+    # pgvector cosine similarity: 1 - (embedding <#> q_emb) for inner product or use <=> for euclidean
+    stmt = sql_text(\"\"\"
+        SELECT id, document_id, text, metadata, 1 - (embedding <#> :query_vec) AS score
+        FROM chunks
+        ORDER BY embedding <#> :query_vec
+        LIMIT :top_k
+    \"\"\")
+    rows = db.execute(stmt, {\"query_vec\": q_emb, \"top_k\": top_k}).mappings().all()
+    return rows
+
+def embed_query(query: str, model_name: str):
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer(model_name)
+    emb = model.encode([query], normalize_embeddings=True)[0].tolist()
+    return emb
+
+def build_context(chunks: List[Dict[str, Any]]) -> str:
+    parts = []
+    for r in chunks:
+        parts.append(r[\"text\"].strip())
+    return \"\\n\\n---\\n\\n\".join(parts)
+
+def generate_answer(context: str, query: str, template: str = None, variables: Dict[str, Any] = None) -> str:
+    # Placeholder LLM call – replace with your provider (OpenAI/Anthropic/etc.)
+    # Here we just template a simple answer using the retrieved context.
+    header = \"You are FewtureOS, an in-house creative engine. Answer the query using the context.\\n\\n\"
+    prompt = header + f\"Context:\\n{context}\\n\\nQuery:\\n{query}\\n\\nAnswer:\\n\"
+    return prompt + \"[LLM output would go here based on your provider]\"
+"""
+
+# app.py
+app_py = """import os
+from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
+from fastapi.responses import JSONResponse
+from dotenv import load_dotenv
+from db import Base, engine, get_db
+from sqlalchemy.orm import Session
+from schemas import IngestTextRequest, SearchResponseItem, GenerateRequest, OfferExtractRequest, DatasetBuildRequest
+from ingest import ingest_text, embed_texts
+from rag import search, embed_query, build_context, generate_answer
+from models import Chunk
+from typing import List
+
+load_dotenv()
+app = FastAPI(title="FewtureOS API")
+
+# Create tables
+Base.metadata.create_all(bind=engine)
+
+EMBED_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+
+@app.post("/ingest/text")
+def ingest_text_endpoint(payload: IngestTextRequest, db: Session = Depends(get_db)):
+    doc_id, n_chunks = ingest_text(
+        db,
+        text=payload.text,
+        title=payload.title,
+        source=payload.source,
+        metadata=payload.metadata,
+        chunk_size=payload.chunk_size,
+        chunk_overlap=payload.chunk_overlap,
+        embedding_model=EMBED_MODEL,
+    )
+    return {"document_id": doc_id, "chunks": n_chunks}
+
+@app.get("/search", response_model=List[SearchResponseItem])
+def search_endpoint(q: str, top_k: int = 5, db: Session = Depends(get_db)):
+    q_emb = embed_query(q, EMBED_MODEL)
+    rows = search(db, q_emb, top_k=top_k)
+    resp = []
+    for r in rows:
+        resp.append(SearchResponseItem(
+            chunk_id=r["id"],
+            document_id=r["document_id"],
+            score=float(r["score"]),
+            text=r["text"],
+            metadata=r["metadata"]
+        ))
+    return resp
+
+@app.post("/generate")
+def generate_endpoint(payload: GenerateRequest, db: Session = Depends(get_db)):
+    q_emb = embed_query(payload.query, EMBED_MODEL)
+    rows = search(db, q_emb, top_k=payload.top_k)
+    context = build_context(rows)
+    answer = generate_answer(context, payload.query, payload.template, payload.variables)
+    return {"answer": answer, "retrieved": len(rows)}
+
+@app.post("/offer/extract")
+def offer_extract(payload: OfferExtractRequest, db: Session = Depends(get_db)):
+    # Retrieve a larger context and return a structured "offer" stub
+    q_emb = embed_query(payload.query, EMBED_MODEL)
+    rows = search(db, q_emb, top_k=payload.top_k)
+    context = build_context(rows)
+
+    offer = {
+        "positioning": "TBD from model",
+        "pillars": ["Speed-to-story", "Creator-native distribution", "Attention-as-asset"],
+        "tone": ["confident", "youth-culture", "partnership-first"],
+        "proof_points": ["Creator airtime network", "IP rights + distribution", "Track record in sports/music"],
+        "dos": ["Be concise", "Be culture-literate", "Cite audience value"],
+        "donts": ["Sound corporate", "Overpromise without rights clarity"]
+    }
+    return {"context_chars": len(context), "offer_profile": offer}
+
+@app.post("/train/build-dataset")
+def build_dataset(payload: DatasetBuildRequest, db: Session = Depends(get_db)):
+    # Stub: create instruction-output pairs from your corpus (to be curated by editors)
+    # In production, you'd add labeling UI and export to JSONL.
+    return {"message": "Dataset builder stub. Wire your labeling UI and export here."}
+"""
+
+# offer.py
+offer_py = """# Utility for offline 'offer' extraction & styleguide building from your corpus.
+# In practice, you'd call your preferred LLM here.
+"""
+
+# templates
+tpl_press = """You are FewtureOS. Draft a press release using the style below.
+Company: {company}
+Headline Idea: {headline}
+Key Points: {bullets}
+
+Constraints:
+- Youth-culture fluent
+- Crisp, non-corporate
+- Include attention-as-asset class thesis
+"""
+
+# Write files
+files = {
+    "README.md": readme,
+    "requirements.txt": requirements,
+    "docker-compose.yml": docker_compose,
+    ".env.example": env_example,
+    "db.py": db_py,
+    "models.py": models_py,
+    "schemas.py": schemas_py,
+    "ingest.py": ingest_py,
+    "rag.py": rag_py,
+    "app.py": app_py,
+    "offer.py": offer_py,
+    "templates/press_release.txt": tpl_press,
+}
+
+for path, content in files.items():
+    full = os.path.join(base, path)
+    os.makedirs(os.path.dirname(full), exist_ok=True)
+    with open(full, "w") as f:
+        f.write(content)
+
+# Zip it
+zip_path = shutil.make_archive("/mnt/data/FewtureOS_scaffold", "zip", base)
+zip_path

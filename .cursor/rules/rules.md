@@ -1,34 +1,54 @@
-# Cursor Agent Rules
+# Fewture Homepage Project Rules
 
-## Workspace Context
-This file contains the rules for the Cursor AI agent when working in the `/Users/r/Desktop/00_code/` workspace.
+## Project Context
+**Fewture Studios Homepage** - Interactive 3D website with AI chatbot integration
+- Location: `/Users/r/r-code/fewture-homepage`
+- Tech Stack: Three.js, AWS Lambda, OpenAI API, Vanilla JS/CSS
+- Timeline: Prototype today, delivery Monday (hard deadline)
 
-## Global Rules Location
-The complete set of rules and guidelines can be found at:
-`/Users/r/Desktop/00_code/x_rules/.cursorrules.md`
+## Communication Protocol (Josh's Requirements)
+- **Primary:** Email only for all project communication
+- **Daily Updates:** Midday and afternoon progress reports  
+- **Escalation:** 5pm email if anything off track
+- **Text:** True emergencies only (business hours = immediate reply)
+- **Weekend:** Saturday/Sunday check-ins at reasonable intervals
 
-## Key Directives
-1. Always check and follow the global rules in the workspace
-2. Maintain global state across sessions
-3. Update global environment variables appropriately
-4. Follow the workspace structure guidelines
-5. Document changes in the global journal
+## Authority Structure
+- **Creative Direction:** Brandon (follow feedback closely)
+- **Business Timelines:** Josh (firm deadlines)
+- **Technical Implementation:** Cascade AI
 
-## Session Management
-When the user indicates session end:
-- Update global state in x_memory/
-- Create/update journal entries in x_journal/
-- Sync environment variables in x_variables/
-- Maintain persistent memory
-- Update global configurations
-- Document new patterns
+## Current Phase: AWS Chatbot Implementation
+### Completed Features ✅
+- Interactive video system with IRL teaser overlay
+- Full responsive design across all devices
+- Dynamic chat repositioning and scaling
+- Multi-theme mode switching (Light/Dark/Red/Green)
+- 3D camera controls and smooth animations
+- VHS terminal-style chat interface
 
-## Environment Handling
-- Use the master global .env from x_variables/
-- Follow the hierarchical environment variable structure
-- Maintain security for sensitive information
-- Keep documentation updated
+### In Progress 🔄
+- AWS Lambda function deployment
+- API Gateway configuration
+- Frontend-backend integration
+- End-to-end testing
 
-## Reference
-For complete rules and guidelines, refer to:
-`/Users/r/Desktop/00_code/x_rules/.cursorrules.md` 
+### Pending ⏳
+- VHS/80s chatbot styling effects
+- Mouse-over 3D object interactions
+- Floating analysis text overlays
+- Persistent logo glow effects
+- 3D object glitch effects
+
+## Technical Architecture
+- **Frontend:** Three.js 3D rendering, responsive CSS, vanilla JavaScript
+- **Backend:** AWS Lambda (Python 3.11) + API Gateway
+- **AI:** OpenAI GPT-3.5-turbo integration
+- **Cost:** <$50/month for significant traffic
+- **Security:** Environment variables, CORS, API authentication
+
+## Development Priorities
+1. **Today:** Working prototype with live chatbot
+2. **Weekend:** Refinements and testing
+3. **Monday:** Final delivery with documentation
+4. **Ongoing:** Email progress tracking per Josh's protocol 

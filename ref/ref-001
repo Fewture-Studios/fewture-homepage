@@ -1,0 +1,481 @@
+# Create a minimal React front-end (Vite-style structure) that talks to the FewtureOS API.
+# This produces a downloadable zip with a working front-end scaffold.
+
+import os, json, shutil, textwrap, pathlib
+
+root = "/mnt/data/fewtureos_frontend"
+src = f"{root}/src"
+public = f"{root}/public"
+
+os.makedirs(src, exist_ok=True)
+os.makedirs(public, exist_ok=True)
+
+# package.json (Vite + React)
+package_json = {
+  "name": "fewtureos-frontend",
+  "version": "0.1.0",
+  "private": True,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.0"
+  }
+}
+
+# vite.config.js
+vite_config = """import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173
+  }
+})
+"""
+
+# index.html
+index_html = """<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FewtureOS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+"""
+
+# src/main.jsx
+main_jsx = """import React from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App'
+import './styles.css'
+
+createRoot(document.getElementById('root')).render(<App />)
+"""
+
+# src/styles.css
+styles_css = """
+:root {
+  --bg: #0b0c10;
+  --panel: #15171c;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --accent: #6ee7b7;
+  --accent-2: #60a5fa;
+  --danger: #f87171;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+
+.app {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+}
+
+.nav {
+  display: flex; gap: 12px; align-items: center; padding: 14px 18px;
+  background: var(--panel); border-bottom: 1px solid #22252c;
+}
+
+.nav .title { font-weight: 800; letter-spacing: 0.5px; }
+.nav a, .nav button {
+  background: transparent; color: var(--muted); border: 0; cursor: pointer; font-weight: 600;
+}
+.nav a.active, .nav button.active { color: var(--text); }
+.spacer { flex: 1; }
+
+.container { padding: 20px; max-width: 1100px; margin: 0 auto; }
+.panel {
+  background: var(--panel); border: 1px solid #22252c; border-radius: 12px; padding: 18px; margin-bottom: 16px;
+}
+
+.input, textarea, select {
+  width: 100%; background: #0f1115; border: 1px solid #22252c; color: var(--text);
+  padding: 10px 12px; border-radius: 8px; outline: none;
+}
+label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+button.primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #0b0c10;
+  padding: 10px 14px; border: 0; border-radius: 10px; font-weight: 800; cursor: pointer;
+}
+button.ghost { background: transparent; border: 1px solid #2a2e36; color: var(--text); padding: 10px 14px; border-radius: 10px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; white-space: pre-wrap; background: #0f1115; padding: 12px; border-radius: 10px; color: #e5e7eb; }
+.badge { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #0f1115; border: 1px solid #22252c; color: var(--muted); font-size: 12px; }
+hr.div { border: 0; border-top: 1px solid #1f232b; margin: 18px 0; }
+.small { font-size: 12px; color: var(--muted); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+"""
+
+# src/config.js
+config_js = """export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+"""
+
+# src/App.jsx
+app_jsx = """import React, { useState } from 'react'
+import { API_URL } from './config'
+import Ingest from './pages/Ingest'
+import Search from './pages/Search'
+import Generate from './pages/Generate'
+import Offer from './pages/Offer'
+import Dataset from './pages/Dataset'
+
+const tabs = [
+  { id: 'ingest', label: 'Ingest' },
+  { id: 'search', label: 'Search' },
+  { id: 'generate', label: 'Generate' },
+  { id: 'offer', label: 'Offer' },
+  { id: 'dataset', label: 'Dataset' },
+]
+
+export default function App() {
+  const [active, setActive] = useState('ingest')
+
+  return (
+    <div className="app">
+      <div className="nav">
+        <div className="title">FewtureOS</div>
+        <div className="spacer" />
+        {tabs.map(t => (
+          <button key={t.id} className={active === t.id ? 'active' : ''} onClick={() => setActive(t.id)}>{t.label}</button>
+        ))}
+      </div>
+
+      <div className="container">
+        {active === 'ingest' && <Ingest />}
+        {active === 'search' && <Search />}
+        {active === 'generate' && <Generate />}
+        {active === 'offer' && <Offer />}
+        {active === 'dataset' && <Dataset />}
+      </div>
+    </div>
+  )
+}
+"""
+
+# src/pages/Ingest.jsx
+ingest_jsx = """import React, { useState } from 'react'
+import { API_URL } from '../config'
+
+export default function Ingest() {
+  const [text, setText] = useState('')
+  const [title, setTitle] = useState('')
+  const [source, setSource] = useState('writers_room')
+  const [meta, setMeta] = useState('{"project":"demo"}')
+  const [resp, setResp] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  async function submit() {
+    setLoading(true)
+    try {
+      const r = await fetch(`${API_URL}/ingest/text`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text, title, source, metadata: JSON.parse(meta || '{}'),
+          chunk_size: 1200, chunk_overlap: 200
+        })
+      })
+      const data = await r.json()
+      setResp(data)
+    } catch (e) {
+      setResp({ error: e.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="panel">
+      <h2>Ingest Text</h2>
+      <div className="row">
+        <div>
+          <label>Title</label>
+          <input className="input" value={title} onChange={e=>setTitle(e.target.value)} placeholder="Doc title" />
+        </div>
+        <div>
+          <label>Source</label>
+          <input className="input" value={source} onChange={e=>setSource(e.target.value)} placeholder="writers_room / brief / script" />
+        </div>
+      </div>
+      <label>Metadata (JSON)</label>
+      <textarea rows={4} className="input" value={meta} onChange={e=>setMeta(e.target.value)} />
+      <label>Text</label>
+      <textarea rows={12} className="input" value={text} onChange={e=>setText(e.target.value)} placeholder="Paste your writers’ room notes, briefs, scripts..." />
+      <div style={{ display:'flex', gap:12, marginTop:12 }}>
+        <button className="primary" onClick={submit} disabled={loading}>{loading ? 'Ingesting...' : 'Ingest'}</button>
+        <span className="small">POST {API_URL}/ingest/text</span>
+      </div>
+      {resp && (<>
+        <hr className="div" />
+        <div className="badge">Response</div>
+        <pre className="code">{JSON.stringify(resp, null, 2)}</pre>
+      </>)}
+    </div>
+  )
+}
+"""
+
+# src/pages/Search.jsx
+search_jsx = """import React, { useState } from 'react'
+import { API_URL } from '../config'
+
+export default function Search() {
+  const [q, setQ] = useState('brand pillars for IRL')
+  const [topK, setTopK] = useState(5)
+  const [results, setResults] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  async function run() {
+    setLoading(true)
+    try {
+      const r = await fetch(`${API_URL}/search?q=${encodeURIComponent(q)}&top_k=${topK}`)
+      const data = await r.json()
+      setResults(data)
+    } catch (e) {
+      setResults([{error: e.message}])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="panel">
+      <h2>Search</h2>
+      <div className="row">
+        <div>
+          <label>Query</label>
+          <input className="input" value={q} onChange={e=>setQ(e.target.value)} />
+        </div>
+        <div>
+          <label>Top K</label>
+          <input type="number" className="input" value={topK} onChange={e=>setTopK(parseInt(e.target.value||'5'))} />
+        </div>
+      </div>
+      <div style={{ display:'flex', gap:12, marginTop:12 }}>
+        <button className="primary" onClick={run} disabled={loading}>{loading ? 'Searching...' : 'Search'}</button>
+        <span className="small">GET {API_URL}/search</span>
+      </div>
+      {results && (<>
+        <hr className="div" />
+        <div className="badge">Results</div>
+        <div className="grid-3">
+          {results.map((r, i) => (
+            <div key={i} className="panel">
+              <div className="small">Score: {r.score?.toFixed?.(4)}</div>
+              <div className="small">Doc: {r.document_id} | Chunk: {r.chunk_id}</div>
+              <pre className="code">{r.text}</pre>
+              {r.metadata && <pre className="code small">{JSON.stringify(r.metadata, null, 2)}</pre>}
+            </div>
+          ))}
+        </div>
+      </>)}
+    </div>
+  )
+}
+"""
+
+# src/pages/Generate.jsx
+generate_jsx = """import React, { useState } from 'react'
+import { API_URL } from '../config'
+
+export default function Generate() {
+  const [query, setQuery] = useState('Draft a 3-sentence positioning for IRL in Fewture’s voice.')
+  const [template, setTemplate] = useState('')
+  const [topK, setTopK] = useState(5)
+  const [resp, setResp] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  async function run() {
+    setLoading(true)
+    try {
+      const r = await fetch(`${API_URL}/generate`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ query, template, top_k: topK })
+      })
+      const data = await r.json()
+      setResp(data)
+    } catch (e) {
+      setResp({ error: e.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="panel">
+      <h2>RAG Generate</h2>
+      <div className="row">
+        <div>
+          <label>Query</label>
+          <input className="input" value={query} onChange={e=>setQuery(e.target.value)} />
+        </div>
+        <div>
+          <label>Top K</label>
+          <input type="number" className="input" value={topK} onChange={e=>setTopK(parseInt(e.target.value||'5'))} />
+        </div>
+      </div>
+      <label>Template (optional)</label>
+      <textarea rows={6} className="input" value={template} onChange={e=>setTemplate(e.target.value)} placeholder="Paste a template (e.g., press release) with {variables}" />
+      <div style={{ display:'flex', gap:12, marginTop:12 }}>
+        <button className="primary" onClick={run} disabled={loading}>{loading ? 'Generating...' : 'Generate'}</button>
+        <span className="small">POST {API_URL}/generate</span>
+      </div>
+      {resp && (<>
+        <hr className="div" />
+        <div className="badge">Response</div>
+        <pre className="code">{JSON.stringify(resp, null, 2)}</pre>
+      </>)}
+    </div>
+  )
+}
+"""
+
+# src/pages/Offer.jsx
+offer_jsx = """import React, { useState } from 'react'
+import { API_URL } from '../config'
+
+export default function Offer() {
+  const [query, setQuery] = useState('Summarize Fewture’s offer: positioning, pillars, tone, proof points.')
+  const [topK, setTopK] = useState(25)
+  const [resp, setResp] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  async function run() {
+    setLoading(true)
+    try {
+      const r = await fetch(`${API_URL}/offer/extract`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ query, top_k: topK })
+      })
+      const data = await r.json()
+      setResp(data)
+    } catch (e) {
+      setResp({ error: e.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="panel">
+      <h2>Offer Extract</h2>
+      <div className="row">
+        <div>
+          <label>Query</label>
+          <input className="input" value={query} onChange={e=>setQuery(e.target.value)} />
+        </div>
+        <div>
+          <label>Top K</label>
+          <input type="number" className="input" value={topK} onChange={e=>setTopK(parseInt(e.target.value||'25'))} />
+        </div>
+      </div>
+      <div style={{ display:'flex', gap:12, marginTop:12 }}>
+        <button className="primary" onClick={run} disabled={loading}>{loading ? 'Extracting...' : 'Extract'}</button>
+        <span className="small">POST {API_URL}/offer/extract</span>
+      </div>
+      {resp && (<>
+        <hr className="div" />
+        <div className="badge">Response</div>
+        <pre className="code">{JSON.stringify(resp, null, 2)}</pre>
+      </>)}
+    </div>
+  )
+}
+"""
+
+# src/pages/Dataset.jsx
+dataset_jsx = """import React, { useState } from 'react'
+import { API_URL } from '../config'
+
+export default function Dataset() {
+  const [task, setTask] = useState('press_release')
+  const [topK, setTopK] = useState(100)
+  const [resp, setResp] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  async function run() {
+    setLoading(true)
+    try {
+      const r = await fetch(`${API_URL}/train/build-dataset`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ task, top_k: topK })
+      })
+      const data = await r.json()
+      setResp(data)
+    } catch (e) {
+      setResp({ error: e.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="panel">
+      <h2>Dataset Builder</h2>
+      <div className="row">
+        <div>
+          <label>Task</label>
+          <select className="input" value={task} onChange={e=>setTask(e.target.value)}>
+            <option value="press_release">press_release</option>
+            <option value="logline">logline</option>
+            <option value="treatment">treatment</option>
+            <option value="synopsis">synopsis</option>
+          </select>
+        </div>
+        <div>
+          <label>Top K</label>
+          <input type="number" className="input" value={topK} onChange={e=>setTopK(parseInt(e.target.value||'100'))} />
+        </div>
+      </div>
+      <div style={{ display:'flex', gap:12, marginTop:12 }}>
+        <button className="primary" onClick={run} disabled={loading}>{loading ? 'Building...' : 'Build Dataset'}</button>
+        <span className="small">POST {API_URL}/train/build-dataset</span>
+      </div>
+      {resp && (<>
+        <hr className="div" />
+        <div className="badge">Response</div>
+        <pre className="code">{JSON.stringify(resp, null, 2)}</pre>
+      </>)}
+    </div>
+  )
+}
+"""
+
+# README.md
+readme = """# FewtureOS Front-end (Vite + React)
+A minimal, clean UI for FewtureOS that talks to the FastAPI backend.
+
+## Features
+- Ingest writers' room text with metadata
+- Semantic search over your corpus
+- RAG-based content generation
+- Offer extraction (build your positioning/pillars/tone)
+- Dataset builder stub (prep for fine-tuning)
+
+## Quick Start
+1. Ensure the FewtureOS API is running locally at http://localhost:8000 (or set VITE_API_URL).
+2. Install deps:
+   ```bash
+   npm install
+   npm run dev
