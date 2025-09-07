@@ -3,6 +3,23 @@ node_modules/
 
 # Build artifacts
 dist/
+build/
+
+# Asset files
+assets/images/*
+!assets/images/.gitkeep
+assets/models/*
+!assets/models/.gitkeep
+assets/video/*
+!assets/video/.gitkeep
+
+# Deployment artifacts
+deployment/*.zip
+
+# Environment files
+.env
+.env.local
+.env.*.local
 
 # Logs
 logs
