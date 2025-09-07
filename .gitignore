@@ -13,9 +13,6 @@ assets/models/*
 assets/video/*
 !assets/video/.gitkeep
 
-# Video files
-*.mp4
-
 # Deployment artifacts
 deployment/*.zip
 
