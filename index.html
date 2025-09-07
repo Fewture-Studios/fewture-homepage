@@ -516,6 +516,55 @@
             border-color: rgba(255, 255, 255, 0.9);
             transform: translateY(-2px);
         }
+
+        /* Dropdown Menu Styles */
+        .projects-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 3px;
+            backdrop-filter: blur(5px);
+            min-width: 120px;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-item {
+            font-family: 'Courier New', 'Monaco', monospace;
+            font-size: clamp(8px, 1.6vw, 11px);
+            color: #ffffff;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
         
         /* Footer Navigation */
         .footer-navigation {
@@ -741,24 +790,23 @@
         }
         
         .video-layout-container.active {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            grid-template-rows: auto 1fr auto;
-            gap: 20px;
+            display: flex;
+            flex-direction: row;
             align-items: center;
-            justify-items: center;
+            justify-content: flex-start;
             opacity: 1;
             visibility: visible;
+            padding: 80px 20px 100px 20px;
+            box-sizing: border-box;
+            gap: 30px;
         }
         
         /* Video overlay - fits content */
         .video-overlay {
-            grid-column: 1;
-            grid-row: 2;
             width: fit-content;
             height: fit-content;
-            max-width: calc(100vw - 40px);
-            max-height: calc(100vh - 40px);
+            max-width: calc(100vw - 400px);
+            max-height: calc(100vh - 200px);
             border: 2px solid var(--text-color, #000000);
             background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(10px);
@@ -828,15 +876,15 @@
 
         /* Chat positioning in video layout */
         #chat-container.video-content-active {
-            grid-column: 2;
-            grid-row: 2;
             width: 300px;
-            max-width: 25vw;
-            height: fit-content;
-            max-height: 60vh;
+            height: calc(100vh - 160px);
+            min-height: 500px;
+            max-height: 700px;
             position: relative;
-            z-index: 20;
-            transition: all 0.5s ease;
+            z-index: 15;
+            flex-shrink: 0;
+            align-self: flex-start;
+            margin-top: 80px;
         }
         
         /* Responsive adjustments */
@@ -1138,6 +1186,15 @@
         <div class="status-overlay" data-section="home">HOME</div>
         <div class="status-overlay" data-section="about">ABOUT</div>
         <div class="status-overlay" data-section="team">TEAM</div>
+        <div class="status-overlay projects-dropdown" data-section="projects" onclick="toggleProjectsDropdown(event)">
+            PROJECTS
+            <div class="dropdown-menu" id="projects-dropdown-menu">
+                <div class="dropdown-item" onclick="switchToProject('irl')">IRL</div>
+                <div class="dropdown-item" onclick="switchToProject('willie')">WILLIE</div>
+                <div class="dropdown-item" onclick="switchToProject('fund')">FEWTURE FUND</div>
+                <div class="dropdown-item" onclick="switchToProject('mal')">MAL</div>
+            </div>
+        </div>
         <div class="status-overlay" data-section="partners">PARTNERS</div>
         <div class="status-overlay" data-section="contact">CONTACT</div>
     </div>
@@ -1819,8 +1876,8 @@
         const chatInput = document.getElementById('chat-input');
         const chatSend = document.getElementById('chat-send');
 
-        // API endpoint - Live AWS API Gateway URL
-        const API_ENDPOINT = 'https://dbodwffja7.execute-api.us-east-1.amazonaws.com/prod/chat';
+        // API endpoint - Use ALB directly for local development (CORS enabled)
+        const API_ENDPOINT = 'http://fewture-homepage-alb-1364200841.us-east-2.elb.amazonaws.com';
 
         function addMessage(message, isUser = false) {
             addMessageToAll(message, isUser);
@@ -1841,7 +1898,7 @@
             currentOverlayType = 'video';
             
             // Set IRL video source
-            videoSource.src = './assets/video/IRL.mov';
+            videoSource.src = './assets/video/IRL.mp4';
             video.load();
             
             // Show video layout container
@@ -1875,7 +1932,7 @@
             currentOverlayType = 'video';
             
             // Set Fund video source
-            videoSource.src = './assets/video/FewtureFund.MOV';
+            videoSource.src = './assets/video/FEWTUREFUND.mp4';
             video.load();
             
             // Show video layout container
@@ -1905,7 +1962,7 @@
             currentOverlayType = 'video';
             
             // Set Willie video source
-            videoSource.src = './assets/video/Willie.mp4';
+            videoSource.src = './assets/video/WILLIE.mp4';
             video.load();
             
             // Show video layout container
@@ -2237,6 +2294,63 @@
         window.closePageContent = closePageContent;
         window.closeAllOverlays = closeAllOverlays;
         
+        // Dropdown menu functionality
+        function toggleProjectsDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('projects-dropdown-menu');
+            dropdown.classList.toggle('show');
+            
+            // Close dropdown when clicking outside
+            if (dropdown.classList.contains('show')) {
+                document.addEventListener('click', closeDropdownOnClickOutside);
+            } else {
+                document.removeEventListener('click', closeDropdownOnClickOutside);
+            }
+        }
+        
+        function closeDropdownOnClickOutside(event) {
+            const dropdown = document.getElementById('projects-dropdown-menu');
+            const projectsButton = document.querySelector('.projects-dropdown');
+            
+            if (!projectsButton.contains(event.target)) {
+                dropdown.classList.remove('show');
+                document.removeEventListener('click', closeDropdownOnClickOutside);
+            }
+        }
+        
+        function switchToProject(project) {
+            // Close dropdown first
+            const dropdown = document.getElementById('projects-dropdown-menu');
+            dropdown.classList.remove('show');
+            document.removeEventListener('click', closeDropdownOnClickOutside);
+            
+            // Switch to the appropriate project with proper mode switching
+            switch(project) {
+                case 'irl':
+                    switchMode('dark');
+                    showIRLVideo();
+                    break;
+                case 'willie':
+                    switchMode('red');
+                    showWillieVideo();
+                    break;
+                case 'fund':
+                    switchMode('green');
+                    showFundVideo();
+                    break;
+                case 'mal':
+                    switchMode('purple');
+                    switchToSection('mal');
+                    break;
+                default:
+                    console.log('Unknown project:', project);
+            }
+        }
+        
+        // Make functions globally accessible
+        window.toggleProjectsDropdown = toggleProjectsDropdown;
+        window.switchToProject = switchToProject;
+        
         function zoomCameraToObject() {
             if (isZoomedIn) return;
             
@@ -2289,30 +2403,6 @@
             const message = chatInput.value.trim();
             if (!message) return;
 
-            // Check for theme triggers
-            if (checkForFewtureKeywords(message) && currentMode !== 'light') {
-                switchMode('light');
-            } else if (checkForIRLKeywords(message) && currentMode !== 'dark') {
-                switchMode('dark');
-            } else if (checkForWillieKeywords(message) && currentMode !== 'red') {
-                switchMode('red');
-            } else if (checkForFundKeywords(message) && currentMode !== 'green') {
-                switchMode('green');
-            } else if (checkForMALKeywords(message) && currentMode !== 'purple') {
-                switchMode('purple');
-            }
-            
-            // Check for video triggers in user message
-            const lowerMessage = message.toLowerCase();
-            
-            if (lowerMessage.includes('irl') || lowerMessage.includes('teaser')) {
-                showIRLVideo();
-            } else if (lowerMessage.includes('fund') || lowerMessage.includes('fewture fund')) {
-                showFundVideo();
-            } else if (lowerMessage.includes('willie') || lowerMessage.includes('mal') || lowerMessage.includes('mallory')) {
-                showWillieVideo();
-            }
-
             // Add user message to chat
             addMessage(message, true);
             chatInput.value = '';
@@ -2321,12 +2411,22 @@
             addMessage('Thinking...');
 
             try {
+                // Get current user context and memory
+                const userContext = getUserContext();
+                const userInfo = getUserInfo();
+                
+                const requestBody = {
+                    message: message,
+                    user: userInfo,
+                    context: userContext
+                };
+
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify(requestBody)
                 });
 
                 const data = await response.json();
@@ -2337,16 +2437,25 @@
                 // Add bot response
                 addMessage(data.reply);
 
-                // Handle any 3D scene actions
-                if (data.action) {
-                    handleSceneAction(data.action);
+                // Handle enhanced actions array
+                if (data.actions && Array.isArray(data.actions)) {
+                    handleActions(data.actions);
                 }
+
+                // Also check for keyword triggers as fallback
+                checkKeywordTriggers(message);
+
+                // Update chat history
+                updateChatHistory(message, data.reply);
 
             } catch (error) {
                 // Remove typing indicator
-                chatMessages.removeChild(chatMessages.lastChild);
+                if (chatMessages.lastChild && chatMessages.lastChild.textContent === 'Thinking...') {
+                    chatMessages.removeChild(chatMessages.lastChild);
+                }
                 addMessage('Sorry, I encountered an error. Please try again.');
                 console.error('Chat error:', error);
+                console.error('Error details:', error.message);
             }
         }
 
@@ -2592,32 +2701,73 @@
             });
         }
 
-        function handleSceneAction(action) {
-            // Handle different actions from the chatbot
-            switch(action) {
+        function handleActions(actions) {
+            // Handle enhanced actions array from chatbot
+            actions.forEach(action => {
+                switch(action.type) {
+                    case 'mode':
+                        if (currentMode !== action.value) {
+                            switchMode(action.value);
+                        }
+                        break;
+                    
+                    case 'open_video':
+                        switch(action.value) {
+                            case 'irl':
+                                showIRLVideo();
+                                break;
+                            case 'fund':
+                                showFundVideo();
+                                break;
+                            case 'willie':
+                                showWillieVideo();
+                                break;
+                        }
+                        break;
+                    
+                    case 'open_page':
+                        showPageContent(action.value);
+                        break;
+                    
+                    case 'camera':
+                        handleCameraAction(action.value);
+                        break;
+                    
+                    case 'suggest':
+                        showSuggestions(action.value);
+                        break;
+                    
+                    case 'memory':
+                        persistMemory(action.value);
+                        break;
+                    
+                    default:
+                        console.log('Unknown action type:', action.type);
+                }
+            });
+        }
+        
+        function handleCameraAction(cameraAction) {
+            switch(cameraAction) {
                 case 'highlight_model':
-                    // Add glow or highlight effect to the central object
                     if (centralObject) {
-                        // Example: change material color temporarily
+                        // Add glow or highlight effect
                         console.log('Highlighting model...');
+                        // You could add actual highlight effects here
                     }
                     break;
-                case 'rotate_camera':
-                    // Rotate camera around the scene
+                case 'zoom_in':
+                    // Zoom camera closer to model
+                    console.log('Zooming in...');
+                    break;
+                case 'zoom_out':
+                    // Zoom camera out
+                    console.log('Zooming out...');
+                    break;
+                case 'rotate':
+                    // Rotate camera around scene
                     console.log('Rotating camera...');
                     break;
-                case 'dark_mode':
-                    if (currentMode !== 'dark') {
-                        switchMode('dark');
-                    }
-                    break;
-                case 'red_mode':
-                    if (currentMode !== 'red') {
-                        switchMode('red');
-                    }
-                    break;
-                default:
-                    console.log('Unknown action:', action);
             }
         }
 
@@ -2634,8 +2784,147 @@
         init();
         animate();
 
-        // Initialize chat
-        initChat();
+        // Initialize personalization
+        initPersonalization();
+
+        // Memory and personalization functions
+        function getUserContext() {
+            return {
+                section: getCurrentSection(),
+                mode: currentMode,
+                history: getChatHistory(),
+                remembered: hasUserMemory()
+            };
+        }
+        
+        function getUserInfo() {
+            const memory = getStoredMemory();
+            return {
+                id: memory?.id || generateUserId(),
+                name: memory?.name || null,
+                role: memory?.role || 'visitor'
+            };
+        }
+        
+        function getCurrentSection() {
+            // Determine current section based on active overlays or default to home
+            if (document.querySelector('.video-background-overlay.active')) {
+                return 'video';
+            } else if (document.querySelector('.page-content-overlay.active')) {
+                return 'page';
+            }
+            return 'home';
+        }
+        
+        function getChatHistory() {
+            const history = JSON.parse(localStorage.getItem('fewture_chat_history') || '[]');
+            return history.slice(-5); // Keep last 5 interactions
+        }
+        
+        function updateChatHistory(userMessage, botReply) {
+            const history = getChatHistory();
+            history.push({
+                user: userMessage,
+                bot: botReply,
+                timestamp: Date.now()
+            });
+            localStorage.setItem('fewture_chat_history', JSON.stringify(history));
+        }
+        
+        function persistMemory(memoryData) {
+            const existingMemory = getStoredMemory() || {};
+            const updatedMemory = { ...existingMemory, ...memoryData };
+            localStorage.setItem('fewture_user_memory', JSON.stringify(updatedMemory));
+        }
+        
+        function getStoredMemory() {
+            try {
+                return JSON.parse(localStorage.getItem('fewture_user_memory'));
+            } catch {
+                return null;
+            }
+        }
+        
+        function hasUserMemory() {
+            return !!getStoredMemory();
+        }
+        
+        function generateUserId() {
+            return 'user_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        function showSuggestions(suggestions) {
+            // Create suggestion buttons in chat
+            const suggestionsContainer = document.createElement('div');
+            suggestionsContainer.className = 'chat-suggestions';
+            
+            suggestions.forEach(suggestion => {
+                const button = document.createElement('button');
+                button.className = 'suggestion-button';
+                button.textContent = suggestion;
+                button.onclick = () => {
+                    chatInput.value = suggestion;
+                    sendMessage();
+                    suggestionsContainer.remove();
+                };
+                suggestionsContainer.appendChild(button);
+            });
+            
+            chatMessages.appendChild(suggestionsContainer);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Keyword trigger function for fallback state changes
+        function checkKeywordTriggers(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Check for theme triggers
+            if (checkForFewtureKeywords(message) && currentMode !== 'light') {
+                switchMode('light');
+            } else if (checkForIRLKeywords(message) && currentMode !== 'dark') {
+                switchMode('dark');
+            } else if (checkForWillieKeywords(message) && currentMode !== 'red') {
+                switchMode('red');
+            } else if (checkForFundKeywords(message) && currentMode !== 'green') {
+                switchMode('green');
+            } else if (checkForMALKeywords(message) && currentMode !== 'purple') {
+                switchMode('purple');
+            }
+            
+            // Check for video triggers
+            if (lowerMessage.includes('irl') || lowerMessage.includes('teaser')) {
+                showIRLVideo();
+            } else if (lowerMessage.includes('fund') || lowerMessage.includes('fewture fund')) {
+                showFundVideo();
+            } else if (lowerMessage.includes('willie') || lowerMessage.includes('mal') || lowerMessage.includes('mallory')) {
+                showWillieVideo();
+            }
+        }
+        
+        // Check for returning user and personalize greeting
+        function initPersonalization() {
+            const memory = getStoredMemory();
+            if (memory && memory.name) {
+                setTimeout(() => {
+                    const greeting = `Welcome back, ${memory.name}! ${getPersonalizedGreeting(memory)}`;
+                    addMessage(greeting);
+                }, 1000);
+            }
+        }
+        
+        function getPersonalizedGreeting(memory) {
+            const lastTopic = memory.last_topic;
+            switch(lastTopic) {
+                case 'fund':
+                    return 'Last time we discussed the Fund. Want to continue or explore something else?';
+                case 'irl':
+                    return 'You were interested in IRL. Ready to see the latest updates?';
+                case 'studios':
+                    return 'We talked about Studios before. Want to dive deeper or see examples?';
+                default:
+                    return 'What would you like to explore today?';
+            }
+        }
         
         // Wait for DOM to be fully loaded before adding event listeners
         window.addEventListener('load', function() {
@@ -2649,6 +2938,19 @@
                     event.stopPropagation();
                     console.log('Escape pressed, closing overlays');
                     closeAllOverlays();
+                }
+                
+                // Theme switching shortcuts
+                if (event.key === '1') {
+                    switchMode('light');
+                } else if (event.key === '2') {
+                    switchMode('dark');
+                } else if (event.key === '3') {
+                    switchMode('red');
+                } else if (event.key === '4') {
+                    switchMode('green');
+                } else if (event.key === '5') {
+                    switchMode('purple');
                 }
             }, true); // Use capture phase
             
@@ -2684,6 +2986,37 @@
                 });
             }
         });
+        
+        // Add CSS for suggestion buttons
+        const suggestionStyles = document.createElement('style');
+        suggestionStyles.textContent = `
+            .chat-suggestions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin: 10px 0;
+                padding: 0 10px;
+            }
+            
+            .suggestion-button {
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                color: #ffffff;
+                padding: 6px 12px;
+                border-radius: 15px;
+                cursor: pointer;
+                font-size: 12px;
+                transition: all 0.3s ease;
+                white-space: nowrap;
+            }
+            
+            .suggestion-button:hover {
+                background: rgba(255, 255, 255, 0.2);
+                border-color: rgba(255, 255, 255, 0.5);
+                transform: translateY(-1px);
+            }
+        `;
+        document.head.appendChild(suggestionStyles);
 
     </script>
 </body>
