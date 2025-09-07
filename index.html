@@ -179,9 +179,9 @@
         }
 
         .chat-message {
-            font-size: clamp(11px, 2.2vw, 15px);
-            line-height: clamp(1.2, 1.4, 1.5);
-            margin-bottom: clamp(4px, 1vw, 8px);
+            font-size: clamp(9px, 1.8vw, 12px);
+            line-height: clamp(1.1, 1.3, 1.4);
+            margin-bottom: clamp(3px, 0.8vw, 6px);
             word-wrap: break-word;
             max-width: 100%;
             overflow-wrap: break-word;
@@ -530,7 +530,7 @@
             border: 1px solid rgba(255, 255, 255, 0.6);
             border-radius: 3px;
             backdrop-filter: blur(5px);
-            min-width: 120px;
+            width: 100%;
             z-index: 1001;
             opacity: 0;
             visibility: hidden;
@@ -693,8 +693,9 @@
         
         /* Team-specific styling */
         .team-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
             gap: 15px;
             width: 100%;
         }
@@ -705,6 +706,7 @@
             align-items: center;
             text-align: center;
             min-height: 200px;
+            flex: 1;
         }
         
         .team-photo {
@@ -1175,9 +1177,7 @@
     <div class="footer-navigation">
         <div class="footer-nav-item" onclick="showPageContent('terms')">TERMS</div>
         <div class="footer-nav-item" onclick="showPageContent('privacy')">PRIVACY</div>
-        <div class="footer-nav-item" onclick="showPageContent('status')">STATUS</div>
         <div class="footer-nav-item" onclick="showPageContent('careers')">CAREERS</div>
-        <div class="footer-nav-item" onclick="showPageContent('press')">PRESS</div>
         <div class="footer-nav-item" onclick="showPageContent('contact')">CONTACT</div>
     </div>
 
@@ -1236,8 +1236,8 @@
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
         import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'; 
-        // Import GLTFLoader if you plan to load a custom model later
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
         // --- Core Setup ---
@@ -1384,16 +1384,25 @@
             scene.add(flowLines); 
             // --- End Flowing Lines Setup ---
 
-            // --- Post-processing (Subtle Bloom) --- 
+            // --- Post-processing (Subtle Bloom + Depth of Field) --- 
             const renderScene = new RenderPass(scene, camera);
             const bloomPass = new UnrealBloomPass(
                 new THREE.Vector2(window.innerWidth, window.innerHeight),
                 0.25, 0.6, 0.95 
             );
+            
+            // Add depth of field effect
+            const bokehPass = new BokehPass(scene, camera, {
+                focus: 8.0,      // Focus distance (matches camera distance)
+                aperture: 0.005, // Aperture size (smaller = less blur)
+                maxblur: 0.003   // Maximum blur amount (reduced)
+            });
+            
             const outputPass = new OutputPass(); 
             composer = new EffectComposer(renderer);
             composer.addPass(renderScene);
-            composer.addPass(bloomPass); 
+            composer.addPass(bloomPass);
+            composer.addPass(bokehPass);
             composer.addPass(outputPass);
             // --- End Post-processing ---
 
@@ -1744,7 +1753,7 @@
                 currentLookAt.lerp(targetLookAt, 0.05); 
                 camera.lookAt(currentLookAt);
             }
-            camera.position.set(0, 5, 15);
+            camera.position.set(0, 3, 8);
             camera.lookAt(0, 0, 0);
             
             // Store original camera position
@@ -1956,23 +1965,6 @@
             const video = document.getElementById('irl-video-player');
             const videoSource = video.querySelector('source');
             const chatContainer = document.getElementById('chat-container');
-            const navBar = document.querySelector('.navigation-bar');
-            
-            // Set current overlay type
-            currentOverlayType = 'video';
-            
-            // Set Willie video source
-            videoSource.src = './assets/video/WILLIE.mp4';
-            video.load();
-            
-            // Show video layout container
-            videoLayoutContainer.classList.add('active');
-            video.currentTime = 0;
-            
-            // Move chat into grid layout
-            videoLayoutContainer.appendChild(chatContainer);
-            chatContainer.classList.add('video-content-active');
-            navBar.classList.add('video-active');
             
             // Zoom camera closer to 3D object
             zoomCameraToObject();
@@ -2125,57 +2117,21 @@
                             </div>
                         </div>
                     `;
-                case 'status':
-                    return `
-                        <div class="page-content-container">
-                            <div class="page-section-title">System Status</div>
-                            <div class="info-box">
-                                <h3>Service Status</h3>
-                                <p>All systems operational. No current outages or maintenance windows.</p>
-                            </div>
-                            <div class="info-box">
-                                <h3>Performance Metrics</h3>
-                                <p>99.9% uptime maintained across all services and platforms.</p>
-                            </div>
-                            <div class="info-box">
-                                <h3>Recent Updates</h3>
-                                <p>Latest platform improvements and feature releases deployed successfully.</p>
-                            </div>
-                        </div>
-                    `;
                 case 'careers':
                     return `
                         <div class="page-content-container">
                             <div class="page-section-title">Careers</div>
                             <div class="info-box">
-                                <h3>Join Our Team</h3>
-                                <p>We're looking for talented individuals to help shape the future of digital experiences.</p>
+                                <h3>Join Fewture</h3>
+                                <p>Help us build the creator economy through Studios, Fund, and live IP like the Internet Racing League.</p>
                             </div>
                             <div class="info-box">
-                                <h3>Open Positions</h3>
-                                <p>Current opportunities in engineering, design, and creative development.</p>
+                                <h3>Open Roles</h3>
+                                <p>Seeking creators, operators, and builders who move at internet speed and stay fluent in culture.</p>
                             </div>
                             <div class="info-box">
-                                <h3>Company Culture</h3>
-                                <p>Innovation-driven environment with focus on creativity and technical excellence.</p>
-                            </div>
-                        </div>
-                    `;
-                case 'press':
-                    return `
-                        <div class="page-content-container">
-                            <div class="page-section-title">Press & Media</div>
-                            <div class="info-box">
-                                <h3>Press Releases</h3>
-                                <p>Latest announcements and company news for media outlets.</p>
-                            </div>
-                            <div class="info-box">
-                                <h3>Media Kit</h3>
-                                <p>Brand assets, logos, and promotional materials for press use.</p>
-                            </div>
-                            <div class="info-box">
-                                <h3>Media Inquiries</h3>
-                                <p>Contact our press team for interviews and media opportunities.</p>
+                                <h3>Our Culture</h3>
+                                <p>Creator-led, ownership-focused environment where attention converts to equity and authentic competition meets entertainment.</p>
                             </div>
                         </div>
                     `;
@@ -2184,16 +2140,16 @@
                         <div class="page-content-container">
                             <div class="page-section-title">About Fewture</div>
                             <div class="info-box">
-                                <h3>Company Overview</h3>
-                                <p>Fewture is a forward-thinking technology company focused on creating innovative digital experiences and virtual influencer platforms.</p>
+                                <h3>Fewture Studios</h3>
+                                <p>A co-founder engine for creators. We conceive, build, and scale creator-led companies by offering company design, team building, go-to-market strategy, and financing. Moving at internet speed while staying fluent in culture.</p>
                             </div>
                             <div class="info-box">
-                                <h3>Mission Statement</h3>
-                                <p>Building the future of digital interaction through cutting-edge 3D technology, AI integration, and creative storytelling.</p>
+                                <h3>Fewture Fund</h3>
+                                <p>Early-stage capital arm targeting $50M with ~75 investments. Focus on Pre-seed to Seed rounds with $500k–$1.5M checks. Investment mix: Live IP (40%), Consumer Products (30%), Tech/Tools (20%).</p>
                             </div>
                             <div class="info-box">
-                                <h3>Company History</h3>
-                                <p>Founded with a vision to revolutionize digital experiences and virtual presence in the modern world.</p>
+                                <h3>Internet Racing League (IRL)</h3>
+                                <p>Flagship live IP combining kart-based motorsport with creator culture. Global karting league across LATAM, USA, EU, and MENA regions, culminating in the 2026 IRL Money Cup with $1M prize pool at SoFi Stadium.</p>
                             </div>
                         </div>
                     `;
@@ -2205,33 +2161,25 @@
                                 <div class="info-box team-member">
                                     <div class="team-photo">[Photo]</div>
                                     <div class="team-info">
-                                        <h3>Josh</h3>
-                                        <p class="role">CEO & Founder</p>
-                                        <p>Visionary leader driving Fewture's strategic direction and innovation initiatives.</p>
+                                        <h3>Kai Henry</h3>
+                                        <p class="role">CEO</p>
+                                        <p>Leading Fewture Studios as a co-founder engine for creators, building and scaling creator-led companies.</p>
                                     </div>
                                 </div>
                                 <div class="info-box team-member">
                                     <div class="team-photo">[Photo]</div>
                                     <div class="team-info">
-                                        <h3>Brandon</h3>
-                                        <p class="role">Creative Director</p>
-                                        <p>Leading creative vision and design excellence across all Fewture projects.</p>
+                                        <h3>Josh Stein</h3>
+                                        <p class="role">President & COO</p>
+                                        <p>Driving operations and media strategy across Studios, Fund, and IRL initiatives.</p>
                                     </div>
                                 </div>
                                 <div class="info-box team-member">
                                     <div class="team-photo">[Photo]</div>
                                     <div class="team-info">
-                                        <h3>Development Team</h3>
-                                        <p class="role">Engineering</p>
-                                        <p>Expert engineers building cutting-edge 3D experiences and AI integrations.</p>
-                                    </div>
-                                </div>
-                                <div class="info-box team-member">
-                                    <div class="team-photo">[Photo]</div>
-                                    <div class="team-info">
-                                        <h3>Creative Team</h3>
-                                        <p class="role">Design & Art</p>
-                                        <p>Talented designers crafting immersive digital experiences and virtual worlds.</p>
+                                        <h3>Brandon Dalton</h3>
+                                        <p class="role">Chief Attention Officer</p>
+                                        <p>Leading creative vision and IP development, including the Internet Racing League.</p>
                                     </div>
                                 </div>
                             </div>
@@ -2242,20 +2190,20 @@
                         <div class="page-content-container">
                             <div class="page-section-title">Partners & Collaborators</div>
                             <div class="info-box">
-                                <h3>Strategic Partners</h3>
-                                <p>Industry-leading companies collaborating on groundbreaking digital experiences.</p>
+                                <h3>Creator Partners</h3>
+                                <p>Working with top creators and streamers to build creator-led companies and develop live IP experiences like the Internet Racing League.</p>
                             </div>
                             <div class="info-box">
-                                <h3>Technology Partners</h3>
-                                <p>Cutting-edge tech companies providing infrastructure and innovation support.</p>
+                                <h3>Investment Partners</h3>
+                                <p>Collaborating with LPs and co-investors on our $50M fund targeting pre-seed to seed stage creator economy and live IP investments.</p>
                             </div>
                             <div class="info-box">
-                                <h3>Creative Collaborators</h3>
-                                <p>Talented studios and agencies working together on immersive projects.</p>
+                                <h3>Media & Platform Partners</h3>
+                                <p>Partnering with streaming platforms, social media networks, and media companies to amplify creator-led content and live events.</p>
                             </div>
                             <div class="info-box">
-                                <h3>Client Success Stories</h3>
-                                <p>Showcase of successful partnerships and delivered digital experiences.</p>
+                                <h3>Motorsport & Venue Partners</h3>
+                                <p>Working with karting facilities, racing organizations, and major venues like SoFi Stadium to deliver world-class IRL racing experiences.</p>
                             </div>
                         </div>
                     `;
@@ -2340,7 +2288,7 @@
                     break;
                 case 'mal':
                     switchMode('purple');
-                    switchToSection('mal');
+                    showMalContent();
                     break;
                 default:
                     console.log('Unknown project:', project);
@@ -2350,7 +2298,97 @@
         // Make functions globally accessible
         window.toggleProjectsDropdown = toggleProjectsDropdown;
         window.switchToProject = switchToProject;
+        window.showMalContent = showMalContent;
         
+        function showMalContent() {
+            console.log('Showing MAL Content');
+            
+            // Close any existing overlays first
+            closeAllOverlays();
+            
+            const pageContentOverlay = document.getElementById('page-content-overlay');
+            const videoBackground = document.getElementById('video-background-overlay');
+            const pageContent = document.getElementById('page-content');
+            const navBar = document.querySelector('.navigation-bar');
+            
+            // Set current overlay type
+            currentOverlayType = 'page';
+            
+            // Generate MAL content using page content system
+            pageContent.innerHTML = `
+                <div class="page-content-header">
+                    <h1>MAL WAR[3]</h1>
+                    <button class="close-btn" onclick="closePageContent()">×</button>
+                </div>
+                
+                <div class="page-content-body">
+                    <div class="profile-section">
+                        <div class="profile-image">
+                            <div class="image-placeholder">[MAL PROFILE IMAGE]</div>
+                        </div>
+                        
+                        <div class="profile-details">
+                            <h2>Mal Warxhaj</h2>
+                            <div class="profile-subtitle">Age: 25 | Origin: Durrës, Albania | Base: Downtown LA</div>
+                            <div class="profile-tagline">"Threading Tomorrow"</div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h3>Background</h3>
+                        <p>Mal Warxhaj, 25, has already stitched together a cross-continental story as bold as her handmade wardrobe. Raised in coastal Durrës, Albania, she learned couture fundamentals from her mother and grandmother—drafting patterns on kitchen tables and embroidering folkloric motifs by candleight.</p>
+                        
+                        <p>Landing in Downtown LA, she settled into a tiny loft above the arts district and took a barista job at Il Caffé, the unofficial clubhouse for fashion renegades, indie musicians, underground party promoters, and crypto futurists. Between espresso pulls she traded style hacks for song demos, outfitting new friends in one-of-a-kind pieces while live-streaming the process.</p>
+                        
+                        <h3>Digital Identity</h3>
+                        <p>Her feed quickly became a mash-up of Albanian folk embroidery, avant-street silhouettes, and performance-art vignettes scored to Balkan-infused hyper-pop—earning her a rapidly growing global audience hungry for heritage reimagined through Gen-Z eyes.</p>
+                        
+                        <h3>Current Operations</h3>
+                        <p>Today, she fronts micro-collections on Depop before they hit IRL pop-ups, DJ's curatorial sets at warehouse galleries, and collaborates with Web3 collectives to tokenize limited-edition garments. Equal parts designer, digital storyteller, and cultural bridge-builder, Mal is proof that in LA's new creative economy, the loom, the lens, and the algorithm can all share the same runway.</p>
+                        
+                        <div class="capabilities-grid">
+                            <div class="capability-item">
+                                <h4>Digital Identity</h4>
+                                <p>Hyper-real 3D avatar (Metahuman rig)<br>Voice model (Balkan-infused vocals)</p>
+                            </div>
+                            <div class="capability-item">
+                                <h4>Content Creation</h4>
+                                <p>Fashion-as-Performance<br>Live-stitched one-off garments<br>Balkan-hyper-pop mixes + AI stems</p>
+                            </div>
+                            <div class="capability-item">
+                                <h4>Web3 Operations</h4>
+                                <p>Tokenized wearables & garment NFTs<br>ERC-6551 token-bound accounts</p>
+                            </div>
+                            <div class="capability-item">
+                                <h4>Community Network</h4>
+                                <p>"Warp & Weft" Discord roles<br>Weekly pattern drops → user remixes</p>
+                            </div>
+                        </div>
+                        
+                        <div class="tech-stack">
+                            <h3>Tech Stack</h3>
+                            <ul>
+                                <li>Unreal Metahuman + Live Link Face</li>
+                                <li>Stable-Diffusion textile ideation</li>
+                                <li>Voice-cloning & AI music generators</li>
+                                <li>ERC-6551 "token-bound accounts" for garments</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Show page content overlay and background
+            pageContentOverlay.classList.add('active');
+            videoBackground.classList.add('active');
+            
+            // Transition navigation
+            navBar.classList.add('video-active');
+            
+            // Zoom camera closer to 3D object
+            zoomCameraToObject();
+        }
+
         function zoomCameraToObject() {
             if (isZoomedIn) return;
             
@@ -3017,6 +3055,205 @@
             }
         `;
         document.head.appendChild(suggestionStyles);
+
+        // Add MAL Dossier styling
+        const malDossierStyles = document.createElement('style');
+        malDossierStyles.textContent = `
+            .mal-dossier-container {
+                background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+                color: #00ff41;
+                font-family: 'Courier New', monospace;
+                padding: 20px;
+                height: 100%;
+                overflow-y: auto;
+                border: 2px solid #00ff41;
+                box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            }
+            
+            .dossier-header {
+                border-bottom: 2px solid #00ff41;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+            
+            .classification {
+                color: #ff0040;
+                font-weight: bold;
+                font-size: 14px;
+                letter-spacing: 2px;
+                text-shadow: 0 0 10px #ff0040;
+            }
+            
+            .subject-id {
+                font-size: 18px;
+                font-weight: bold;
+                margin: 10px 0;
+                text-shadow: 0 0 10px #00ff41;
+            }
+            
+            .timestamp {
+                font-size: 12px;
+                color: #888;
+            }
+            
+            .profile-section {
+                display: flex;
+                gap: 20px;
+                margin-bottom: 25px;
+            }
+            
+            .profile-image {
+                flex-shrink: 0;
+                width: 150px;
+            }
+            
+            .image-placeholder {
+                width: 150px;
+                height: 200px;
+                background: #000;
+                border: 2px solid #00ff41;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                color: #ff0040;
+                margin-bottom: 10px;
+            }
+            
+            .biometric-data {
+                font-size: 11px;
+            }
+            
+            .data-line {
+                padding: 2px 0;
+                border-bottom: 1px solid #333;
+            }
+            
+            .profile-details h2 {
+                color: #00ff41;
+                font-size: 24px;
+                margin: 0 0 10px 0;
+                text-shadow: 0 0 15px #00ff41;
+            }
+            
+            .codename {
+                color: #ffaa00;
+                font-weight: bold;
+                margin-bottom: 15px;
+                text-shadow: 0 0 10px #ffaa00;
+            }
+            
+            .background-brief h3 {
+                color: #00ff41;
+                font-size: 14px;
+                margin: 15px 0 8px 0;
+                text-decoration: underline;
+            }
+            
+            .background-brief p {
+                font-size: 12px;
+                line-height: 1.4;
+                margin-bottom: 10px;
+                color: #ccc;
+            }
+            
+            .capabilities-section h3,
+            .mission-status h3,
+            .tech-specs h3 {
+                color: #00ff41;
+                font-size: 16px;
+                margin: 20px 0 15px 0;
+                text-decoration: underline;
+                text-shadow: 0 0 10px #00ff41;
+            }
+            
+            .capability-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .capability-item {
+                background: rgba(0, 255, 65, 0.1);
+                border: 1px solid #00ff41;
+                padding: 10px;
+                border-radius: 3px;
+            }
+            
+            .cap-title {
+                color: #ffaa00;
+                font-weight: bold;
+                font-size: 12px;
+                margin-bottom: 5px;
+                text-shadow: 0 0 8px #ffaa00;
+            }
+            
+            .cap-desc {
+                font-size: 11px;
+                line-height: 1.3;
+                color: #ccc;
+            }
+            
+            .phase-tracker {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .phase {
+                padding: 8px 12px;
+                border: 1px solid #333;
+                background: rgba(0, 0, 0, 0.5);
+                font-size: 12px;
+                color: #666;
+            }
+            
+            .phase.active {
+                border-color: #00ff41;
+                background: rgba(0, 255, 65, 0.2);
+                color: #00ff41;
+                text-shadow: 0 0 8px #00ff41;
+            }
+            
+            .tech-list {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .tech-item {
+                font-size: 12px;
+                color: #ccc;
+                padding: 3px 0;
+            }
+            
+            .dossier-footer {
+                border-top: 2px solid #00ff41;
+                padding-top: 15px;
+                margin-top: 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .clearance {
+                font-size: 11px;
+                color: #00ff41;
+            }
+            
+            .warning {
+                font-size: 11px;
+                color: #ff0040;
+                text-shadow: 0 0 8px #ff0040;
+            }
+        `;
+        document.head.appendChild(malDossierStyles);
+
+        // Make functions globally accessible
+        window.showPageContent = showPageContent;
+        window.closePageContent = closePageContent;
 
     </script>
 </body>

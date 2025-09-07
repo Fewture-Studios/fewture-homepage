@@ -98,34 +98,34 @@ def lambda_handler(event, context):
                         'messages': [
                             {
                                 'role': 'system', 
-                                'content': f'''You are the Fewture Assistant with enhanced site integration capabilities.
+                                'content': f'''You are Fewture's AI assistant. Be concise, smart, and action-oriented.
 
-CORE KNOWLEDGE:
-- Fewture Studios: Co-founder engine for creators. Leaders: Kai Henry (CEO), Josh Stein (President/COO), Brandon Dalton (Chief Attention Officer).
-- Fewture Fund: Early-stage capital arm. Target $50M, ~75 investments, $500k-$1.5M checks. Focus: Live IP (40%), Consumer Products (30%), Tech/Tools (20%).
-- IRL (Internet Racing League): Flagship live IP combining kart racing with creators. Regional format (LATAM, USA, EU, MENA).
+FEWTURE ECOSYSTEM:
+• Studios: Cutting-edge LA-based content/tech company, Hollywood 2.0 entertainment, internet native IP development (Kai Henry CEO, Josh Stein President/COO, Brandon Dalton Chief Attention Officer)
+• Fund: $50M early-stage capital, 75 investments, $500k-1.5M checks (Live IP 40%, Consumer 30%, Tech 20%)
+• IRL: Internet Racing League - flagship live IP, kart racing + creators, global regions (LATAM/USA/EU/MENA), 2026 Money Cup $1M at SoFi Stadium
 
-CURRENT CONTEXT:
-- User: {user_info.get('name', 'visitor')} ({user_info.get('role', 'visitor')})
-- Section: {user_context.get('section', 'home')}
-- Mode: {user_context.get('mode', 'light')}
-- History: {len(user_context.get('history', []))} previous interactions
+PROJECTS:
+• IRL: Teaser available, combines motorsport with creator culture
+• Willie: "The Return of Steamboat Willie" - feature-length animated horror film in Unreal Engine. After 95 years locked away, Willie wants his steamboat back. Public domain since Jan 1, 2024. Red theme.
+• MAL WAR[3]: AI influencer, Albanian heritage, Web3 fashion, "Threading Tomorrow", purple theme
+• Fund: Investment platform with green theme
 
-ACTION CAPABILITIES:
-- mode: Switch themes (light/dark/red/green/purple)
-- open_video: Show videos (irl/fund/willie)
-- open_page: Display content (team/about/projects)
-- camera: Control 3D view (zoom_in/zoom_out/rotate)
-- suggest: Offer structured options
-- memory: Store user preferences
+SITE FEATURES:
+• 3D interactive scene with camera controls
+• Video overlays for project demos
+• Page overlays for team/about/partners info
+• Theme switching (light/dark/red/green/purple)
+• Chat integration with action triggers
 
-STYLE: Warm, clear, professional. Always propose 2-3 actionable next steps. Use actions to enhance the experience.
+CONTEXT:
+User: {user_info.get('name', 'visitor')} | Section: {user_context.get('section', 'home')} | Mode: {user_context.get('mode', 'light')}
 
-RESPONSE FORMAT: Provide both text reply AND appropriate actions array.'''
+STYLE: Brief, direct responses. Suggest 1-2 specific actions. Use site features actively.'''
                             },
                             {'role': 'user', 'content': user_message}
                         ],
-                        'max_tokens': 100,
+                        'max_tokens': 60,
                         'temperature': 0.7,
                         'frequency_penalty': 0,
                         'presence_penalty': 0
@@ -221,9 +221,12 @@ def generate_actions(user_message, ai_reply, user_context, user_info):
     elif any(word in message_lower for word in ['fund', 'investment', 'capital']):
         if user_context.get('mode') != 'green':
             actions.append({'type': 'mode', 'value': 'green'})
-    elif any(word in message_lower for word in ['willie', 'mal', 'mallory']):
+    elif any(word in message_lower for word in ['willie', 'mallory']):
         if user_context.get('mode') != 'red':
             actions.append({'type': 'mode', 'value': 'red'})
+    elif any(word in message_lower for word in ['mal', 'threading tomorrow', 'albania', 'fashion']):
+        if user_context.get('mode') != 'purple':
+            actions.append({'type': 'mode', 'value': 'purple'})
     elif any(word in message_lower for word in ['studios', 'fewture', 'default']):
         if user_context.get('mode') != 'light':
             actions.append({'type': 'mode', 'value': 'light'})
@@ -233,8 +236,10 @@ def generate_actions(user_message, ai_reply, user_context, user_info):
         actions.append({'type': 'open_video', 'value': 'irl'})
     elif any(word in message_lower for word in ['fund', 'investment']):
         actions.append({'type': 'open_video', 'value': 'fund'})
-    elif any(word in message_lower for word in ['willie', 'mal', 'mallory']):
+    elif any(word in message_lower for word in ['willie', 'mallory', 'steamboat', 'horror', 'unreal engine']):
         actions.append({'type': 'open_video', 'value': 'willie'})
+    elif any(word in message_lower for word in ['mal', 'threading tomorrow', 'albania']):
+        actions.append({'type': 'open_page', 'value': 'mal'})
     
     # Page content actions
     if any(word in message_lower for word in ['team', 'people', 'who']):
@@ -282,7 +287,9 @@ def extract_topic(message):
         return 'irl'
     elif any(word in message_lower for word in ['studios', 'company', 'team']):
         return 'studios'
-    elif any(word in message_lower for word in ['willie', 'mal', 'mallory']):
+    elif any(word in message_lower for word in ['willie', 'mallory']):
         return 'willie'
+    elif any(word in message_lower for word in ['mal', 'threading tomorrow', 'albania']):
+        return 'mal'
     else:
         return 'general'
