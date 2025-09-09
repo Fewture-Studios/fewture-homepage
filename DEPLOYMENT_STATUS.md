@@ -58,6 +58,7 @@
 2. **Asset Serving**: Fixed 405 errors with proper content-type detection
 3. **Chatbot Integration**: Updated frontend API endpoint from HTTP ALB to HTTPS relative path
 4. **Lambda Code**: Enhanced with website serving and binary file support
+5. **Video Streaming**: Implemented S3 pre-signed URL redirects for large video files (bypasses Lambda 6MB limit)
 
 ### Files Modified
 - `backend/lambda_function.py`: Added S3 proxy functionality and content-type handling

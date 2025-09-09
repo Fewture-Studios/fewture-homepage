@@ -361,7 +361,24 @@ def serve_website_file(event):
         s3_key = path.lstrip('/')
         
         try:
-            # Get file from S3
+            # For large video files, redirect to S3 pre-signed URL to avoid Lambda 6MB limit
+            if s3_key.endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm')):
+                # Generate pre-signed URL for video files
+                presigned_url = s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={'Bucket': bucket_name, 'Key': s3_key},
+                    ExpiresIn=3600  # 1 hour expiration
+                )
+                return {
+                    'statusCode': 302,
+                    'headers': {
+                        'Location': presigned_url,
+                        'Cache-Control': 'public, max-age=3600'
+                    },
+                    'body': ''
+                }
+            
+            # Get file from S3 for non-video files
             response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
             content = response['Body'].read()
             content_type = response.get('ContentType', 'application/octet-stream')
