@@ -42,10 +42,9 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            width: 150px; 
-            height: auto; 
-            z-index: 2; 
-            background: none; 
+            z-index: 1000;
+            transition: all 0.3s ease;
+            opacity: 1;
             border: none; 
         }
 
@@ -596,8 +595,16 @@
             display: inline-block;
             margin: 0;
             backdrop-filter: blur(5px);
-            border-radius: 0;
+            border-radius: 8px;
             white-space: nowrap;
+        }
+        
+        /* Prevent header movement when overlays are active */
+        .navigation-bar.video-active {
+            position: fixed !important;
+            bottom: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
         }
         
         /* Dark mode header text visibility */
@@ -663,7 +670,7 @@
             font-family: 'Courier New', 'Monaco', monospace;
             font-size: clamp(9px, 1.7vw, 12px);
             font-weight: bold;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             transition: background-color 0.2s ease;
             white-space: nowrap;
             cursor: pointer;
@@ -751,24 +758,29 @@
             top: 0;
             left: 0;
             width: 100vw;
-            height: auto;
-            z-index: 15;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        
+        .page-content-overlay {
             padding-top: 80px;
         }
         
-        /* Desktop-specific styles - disable vh */
+        /* Desktop-specific styles - fixed height */
         @media (min-width: 769px) {
             .page-content-overlay {
-                height: auto;
-                min-height: unset;
-                max-height: none;
+                height: 100vh;
+                min-height: 100vh;
+                max-height: 100vh;
             }
         }
         
@@ -847,6 +859,15 @@
             font-size: clamp(12px, 2.5vw, 16px);
             line-height: clamp(1.2, 1.4, 1.6);
             border-bottom: 1px solid var(--border-color, #000000);
+            position: relative;
+        }
+        
+        .chat-message {
+            margin-bottom: clamp(8px, 2vw, 15px);
+            padding: clamp(8px, 2vw, 15px);
+            font-size: clamp(12px, 2.5vw, 16px);
+            line-height: clamp(1.2, 1.4, 1.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
         }
         
@@ -1026,6 +1047,13 @@
             margin-bottom: 30px;
         }
         
+        .team-member .experience {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            margin-top: 8px;
+        }
+        
         /* Desktop horizontal team layout */
         @media (min-width: 769px) {
             .team-grid {
@@ -1186,6 +1214,8 @@
             opacity: 0;
             visibility: hidden;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
         
         .video-layout-container.active {
@@ -1204,8 +1234,9 @@
         /* Video overlay - minimal stroke outline */
         .video-overlay {
             max-width: 90vw;
+            width: fit-content;
             height: fit-content;
-            max-height: 60vh;
+            max-height: 70vh;
             border: 2px solid var(--text-color, #000000);
             background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(10px);
@@ -1220,13 +1251,21 @@
             grid-row: 1;
             justify-self: center;
             align-self: center;
+            overflow: hidden;
         }
 
         .video-overlay video {
             width: 100%;
             height: auto;
-            border-radius: 2px;
+            max-height: 65vh;
+            max-width: 100%;
             object-fit: contain;
+            background-color: #000;
+            background-image: var(--video-thumbnail, none);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 2px;
             position: relative;
             z-index: 2;
             display: block;
@@ -1376,7 +1415,7 @@
                 width: 350px !important;
                 max-width: 450px !important;
                 height: 300px !important;
-                max-height: 400px !important;
+                max-height: 275px !important;
             }
             
             #chat-input-container {
@@ -1626,7 +1665,7 @@
             z-index: 1000;
             background: transparent;
             border: 1px solid var(--border-color, #000000);
-            border-radius: 4px;
+            border-radius: 8px;
             padding: 8px 12px;
             font-family: 'Courier New', monospace;
             color: var(--text-color, #000000);
@@ -1644,10 +1683,72 @@
             opacity: 1;
         }
         
+        /* Site Instructions */
+        .site-instructions {
+            position: absolute;
+            top: 85px;
+            right: 20px;
+            z-index: 1000;
+            background: transparent;
+            border: 1px solid var(--border-color, #000000);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            color: var(--text-color, #000000);
+            font-size: 11px;
+            font-weight: normal;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            cursor: default;
+            max-width: 200px;
+            text-align: left;
+            line-height: 1.4;
+        }
+        
+        .site-instructions:hover {
+            opacity: 1;
+        }
+        
         /* Close button hover state */
         .close-btn:hover {
             opacity: 1;
             background: rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        /* Close button active/visible state */
+        .close-btn {
+            z-index: 9999 !important;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            border-radius: 8px !important;
+        }
+        
+        /* Blur navigation when overlays are active */
+        .page-content-overlay.active ~ .navigation-bar .status-overlay,
+        .video-layout-container.active ~ .navigation-bar .status-overlay {
+            filter: blur(2px);
+            opacity: 0.3;
+        }
+        
+        /* Enhanced visibility when overlays are active */
+        .page-content-overlay.active ~ * .close-btn,
+        .video-layout-container.active .close-btn {
+            background: rgba(0, 0, 0, 0.9) !important;
+            border-color: rgba(255, 255, 255, 0.2) !important;
+            color: rgba(255, 255, 255, 0.8) !important;
+            opacity: 1;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+            z-index: 10000 !important;
+        }
+        
+        .page-content-overlay.active ~ * .close-btn:hover,
+        .video-layout-container.active .close-btn:hover {
+            background: rgba(0, 0, 0, 1) !important;
+            border-color: rgba(255, 255, 255, 0.4) !important;
+            color: rgba(255, 255, 255, 1) !important;
+            opacity: 1;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7) !important;
         }
 
         @media (max-width: 768px) {
@@ -1656,7 +1757,25 @@
                 right: clamp(10px, 2vw, 15px);
                 font-size: 10px;
                 padding: 6px 10px;
-                height: auto;
+                height: 32px;
+            }
+            
+            .site-instructions {
+                position: fixed;
+                top: 25%;
+                left: 50%;
+                right: auto;
+                transform: translate(-50%, -50%);
+                font-size: 9px;
+                padding: 6px 10px;
+                max-width: 200px;
+                text-align: center;
+                z-index: 1;
+                pointer-events: none;
+            }
+            
+            .close-btn {
+                margin: 0 !important;
             }
         }
 
@@ -1673,7 +1792,14 @@
     
     <!-- Theme Status -->
     <div class="theme-status" id="theme-status" onclick="cycleTheme()">
-        <span id="current-theme">Default</span>
+        <span id="current-theme">default</span>
+    </div>
+    
+    <!-- Site Instructions -->
+    <div class="site-instructions">
+        Click navigation tabs to explore<br>
+        Chat with our AI assistant<br>
+        Cycle themes with indicator above
     </div>
     
     <div id="css2d-container"></div>
@@ -1691,27 +1817,27 @@
 
     <!-- Footer Navigation -->
     <div class="footer-navigation">
-        <div class="footer-nav-item" onclick="showPageContent('terms')">TERMS</div>
-        <div class="footer-nav-item" onclick="showPageContent('privacy')">PRIVACY</div>
-        <div class="footer-nav-item" onclick="showPageContent('careers')">CAREERS</div>
-        <div class="footer-nav-item" onclick="showPageContent('contact')">CONTACT</div>
+        <div class="footer-nav-item" onclick="showPageContent('terms')">terms</div>
+        <div class="footer-nav-item" onclick="showPageContent('privacy')">privacy</div>
+        <div class="footer-nav-item" onclick="showPageContent('careers')">careers</div>
+        <div class="footer-nav-item" onclick="showPageContent('contact')">contact</div>
     </div>
 
     <!-- Navigation Bar -->
     <div class="navigation-bar">
-        <div class="status-overlay" data-section="home">HOME</div>
-        <div class="status-overlay" data-section="about">ABOUT</div>
-        <div class="status-overlay" data-section="team">TEAM</div>
+        <div class="status-overlay" data-section="home">home</div>
+        <div class="status-overlay" data-section="about">about</div>
+        <div class="status-overlay" data-section="team">team</div>
         <div class="status-overlay projects-dropdown" data-section="projects" onclick="toggleProjectsDropdown(event)">
-            PROJECTS
+            projects
             <div class="dropdown-menu" id="projects-dropdown-menu">
-                <div class="dropdown-item" onclick="switchToProject('irl')">IRL</div>
-                <div class="dropdown-item" onclick="switchToProject('willie')">WILLIE</div>
-                <div class="dropdown-item" onclick="switchToProject('fund')">FUND</div>
-                <div class="dropdown-item" onclick="switchToProject('mal')">MAL</div>
+                <div class="dropdown-item" onclick="switchToProject('irl')">irl</div>
+                <div class="dropdown-item" onclick="switchToProject('willie')">willie</div>
+                <div class="dropdown-item" onclick="switchToProject('fund')">fund</div>
+                <div class="dropdown-item" onclick="switchToProject('mal')">mal</div>
             </div>
         </div>
-        <div class="status-overlay" data-section="partners">PARTNERS</div>
+        <div class="status-overlay" data-section="partners">partners</div>
     </div>
 
     <!-- Video Layout Container -->
@@ -1719,7 +1845,7 @@
         <!-- Chat will be moved here by JavaScript -->
         <button class="close-btn" id="video-close-btn" onclick="closeIRLVideo()" style="position: fixed; top: 20px; z-index: 1000; background: transparent; border: 1px solid var(--border-color, #000000); border-radius: 4px; padding: 8px 12px; font-family: 'Courier New', monospace; color: var(--text-color, #000000); font-size: 11px; font-weight: normal; opacity: 0.7; transition: all 0.3s ease; cursor: pointer; height: 40px; display: flex; align-items: center; width: 40px; justify-content: center;">×</button>
         <div id="irl-video-overlay" class="video-overlay">
-            <video id="irl-video-player" controls>
+            <video id="irl-video-player" controls poster="./assets/images/thumbnails/irl-thumbnail.jpeg">
                 <source src="./assets/video/IRL.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
@@ -1731,7 +1857,7 @@
     
     <!-- Page Content Overlay -->
     <div id="page-content-overlay" class="page-content-overlay">
-        <div id="page-content">
+        <div id="page-content" style="mask: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%); -webkit-mask: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);">
             <!-- Dynamic content will be inserted here -->
         </div>
         <button class="close-btn" id="page-close-btn" onclick="closePageContent()" style="position: fixed; top: 20px; z-index: 1000; background: transparent; border: 1px solid var(--border-color, #000000); border-radius: 4px; padding: 8px 12px; font-family: 'Courier New', monospace; color: var(--text-color, #000000); font-size: 11px; font-weight: normal; opacity: 0.7; transition: all 0.3s ease; cursor: pointer; height: 40px; display: flex; align-items: center; width: 40px; justify-content: center;">×</button>
@@ -2424,9 +2550,10 @@
             // Set current overlay type
             currentOverlayType = 'video';
             
-            // Set IRL video source
+            // Set IRL video source and thumbnail
             if (videoSource) {
                 videoSource.src = './assets/video/IRL.mp4';
+                video.poster = './assets/images/thumbnails/irl-thumbnail.jpeg';
                 video.load();
                 video.style.display = 'block';
             }
@@ -2437,7 +2564,7 @@
             
             // Add chat to grid layout without moving DOM element
             chatContainer.classList.add('video-content-active');
-            navBar.classList.add('video-active');
+            // Don't add video-active class to prevent header movement
             
             // Position close button dynamically
             updateCloseButtonPosition();
@@ -2463,9 +2590,10 @@
             // Set current overlay type
             currentOverlayType = 'video';
             
-            // Set Fund video source
+            // Set Fund video source and thumbnail
             if (videoSource) {
                 videoSource.src = './assets/video/FEWTUREFUND.mp4';
+                video.poster = './assets/images/thumbnails/fund-thumbnail.jpeg';
                 video.load();
                 video.style.display = 'block';
             }
@@ -2476,7 +2604,7 @@
             
             // Add chat to grid layout without moving DOM element
             chatContainer.classList.add('video-content-active');
-            navBar.classList.add('video-active');
+            // Don't add video-active class to prevent header movement
             
             // Position close button dynamically
             updateCloseButtonPosition();
@@ -2498,9 +2626,10 @@
             // Set current overlay type
             currentOverlayType = 'video';
             
-            // Set Willie video source
+            // Set Willie video source and thumbnail
             if (videoSource) {
                 videoSource.src = './assets/video/WILLIE.mp4';
+                video.poster = './assets/images/thumbnails/willie-thumbnail.jpeg';
                 video.load();
                 video.style.display = 'block';
             }
@@ -2511,7 +2640,7 @@
             
             // Add chat to grid layout without moving DOM element
             chatContainer.classList.add('video-content-active');
-            navBar.classList.add('video-active');
+            // Don't add video-active class to prevent header movement
             
             // Position close button dynamically
             updateCloseButtonPosition();
@@ -2577,11 +2706,13 @@
                     // Update page close button if it exists
                     if (pageCloseBtn) {
                         pageCloseBtn.style.right = rightOffset + 'px';
+                        pageCloseBtn.style.top = themeStatus.style.top || getComputedStyle(themeStatus).top;
                     }
                     
                     // Update video close button if it exists
                     if (videoCloseBtn) {
                         videoCloseBtn.style.right = rightOffset + 'px';
+                        videoCloseBtn.style.top = themeStatus.style.top || getComputedStyle(themeStatus).top;
                     }
                     
                     console.log('Theme rect:', themeRect, 'Right offset:', rightOffset);
@@ -2757,6 +2888,7 @@
                                         <h3>Kai Henry</h3>
                                         <p class="role">CEO</p>
                                         <p>Powering Fewture as a co-founder to creators, leads the charge in transforming cultural influence into scalable, creator-led enterprises.</p>
+                                        <p class="experience">Previously: FaZe, SolRepublic, Beats Inc, SkeeTV, Merry Jane, The Firm, The Big 3</p>
                                     </div>
                                 </div>
                                 <div class="info-box team-member">
@@ -2765,6 +2897,7 @@
                                         <h3>Josh Stein</h3>
                                         <p class="role">President & COO</p>
                                         <p>Driving the Fewture ecosystem, architects businesses, engineers scalable systems, and operationalizes ventures from vision to execution.</p>
+                                        <p class="experience">Previously: Vice, SubNation, Univision/El Rey Network, Indomina Studios</p>
                                     </div>
                                 </div>
                                 <div class="info-box team-member">
@@ -2773,6 +2906,7 @@
                                         <h3>Brandon Dalton</h3>
                                         <p class="role">Chief Attention Officer</p>
                                         <p>As tastemaker-in-chief, leads creative and IP development, channeling culture, talent, and attention into businesses that scale.</p>
+                                        <p class="experience">Previously: FaZe</p>
                                     </div>
                                 </div>
                             </div>
@@ -2897,10 +3031,7 @@
         }
         
         function updateThemeIndicator(themeName) {
-            const indicator = document.getElementById('current-theme');
-            if (indicator) {
-                indicator.textContent = themeName;
-            }
+            document.getElementById('current-theme').textContent = themeName;
         }
         
         function updateThemeIndicatorFromMode(mode) {
@@ -3021,7 +3152,7 @@
             `;
             
             // Transition navigation
-            navBar.classList.add('video-active');
+            // Don't add video-active class to prevent header movement
             
             // Zoom camera closer to 3D object
             zoomCameraToObject();
@@ -3133,7 +3264,7 @@
             
             // Transition navigation
             const navBar = document.querySelector('.navigation-bar');
-            navBar.classList.add('video-active');
+            // Don't add video-active class to prevent header movement
             
             // Zoom camera closer to 3D object
             zoomCameraToObject();
