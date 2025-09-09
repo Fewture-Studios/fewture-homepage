@@ -583,22 +583,27 @@
         .status-overlay {
             position: relative;
             font-family: 'Courier New', 'Monaco', monospace;
-            font-size: clamp(10px, 2vw, 14px);
-            font-weight: bold;
-            color: #000000;
-            background: transparent;
-            border: 1px solid #000000;
-            padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
+            font-size: clamp(14px, 2.4vw, 18px);
+            font-weight: 700;
+            color: rgba(0, 0, 0, 0.8);
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px 24px;
             cursor: pointer;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             text-decoration: none;
             display: inline-block;
-            margin: 0;
-            backdrop-filter: blur(5px);
-            border-radius: 8px;
             white-space: nowrap;
+            text-align: center;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
-        
+
         /* Prevent header movement when overlays are active */
         .navigation-bar.video-active {
             position: fixed !important;
@@ -624,6 +629,49 @@
         }
         
         .purple-mode .status-overlay {
+            color: #ffffff !important;
+            border-color: rgba(255, 255, 255, 0.4) !important;
+        }
+        
+        /* MAL mode instructions light color */
+        .purple-mode .site-instructions {
+            color: rgba(255, 255, 255, 0.8) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+        }
+        
+        /* MAL mode theme status button light color */
+        .purple-mode .theme-status {
+            color: rgba(255, 255, 255, 0.8) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+        }
+        
+        /* MAL mode close button visibility - light over dark overlay */
+        .purple-mode .page-content-overlay.active .close-btn,
+        .purple-mode .video-layout-container.active .close-btn {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-color: rgba(255, 255, 255, 0.4) !important;
+            color: rgba(255, 255, 255, 1) !important;
+            opacity: 1 !important;
+        }
+        
+        /* MAL mode close button hover */
+        .purple-mode .page-content-overlay.active .close-btn:hover,
+        .purple-mode .video-layout-container.active .close-btn:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+            border-color: rgba(255, 255, 255, 0.6) !important;
+            color: rgba(255, 255, 255, 1) !important;
+            transform: translateY(-1px);
+        }
+        
+        /* Default mode status overlay - black text */
+        body:not(.dark-mode):not(.red-mode):not(.green-mode):not(.purple-mode) .status-overlay {
+            color: #000000 !important;
+            border-color: rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        /* Default mode status overlay when overlays are active - light text */
+        body:not(.dark-mode):not(.red-mode):not(.green-mode):not(.purple-mode) .page-content-overlay.active ~ .navigation-bar .status-overlay,
+        body:not(.dark-mode):not(.red-mode):not(.green-mode):not(.purple-mode) .video-layout-container.active ~ .navigation-bar .status-overlay {
             color: #ffffff !important;
             border-color: rgba(255, 255, 255, 0.4) !important;
         }
@@ -700,11 +748,11 @@
         .footer-nav-item {
             position: relative;
             font-family: 'Courier New', 'Monaco', monospace;
-            font-size: clamp(10px, 2.5vw, 14px);
+            font-size: clamp(8px, 1.8vw, 11px);
             color: #000000;
             background: rgba(255, 255, 255, 0.8);
             border: 1px solid rgba(0, 0, 0, 0.4);
-            padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 16px);
+            padding: clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px);
             border-radius: 3px;
             backdrop-filter: blur(5px);
             cursor: pointer;
@@ -764,7 +812,7 @@
             opacity: 0;
             visibility: hidden;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             transition: all 0.3s ease;
             backdrop-filter: blur(8px);
@@ -781,6 +829,7 @@
                 height: 100vh;
                 min-height: 100vh;
                 max-height: 100vh;
+                padding-top: 40px;
             }
         }
         
@@ -1129,6 +1178,7 @@
             overflow-y: auto;
             overflow-x: visible;
             padding: 15px;
+            padding-top: 80px;
             background: transparent;
             box-sizing: border-box;
             position: relative;
@@ -1688,7 +1738,7 @@
             position: absolute;
             top: 85px;
             right: 20px;
-            z-index: 1000;
+            z-index: 5;
             background: transparent;
             border: 1px solid var(--border-color, #000000);
             border-radius: 8px;
@@ -1698,11 +1748,17 @@
             font-size: 11px;
             font-weight: normal;
             opacity: 0.7;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease, filter 0.3s ease, color 0.3s ease, border-color 0.3s ease;
             cursor: default;
             max-width: 200px;
             text-align: left;
             line-height: 1.4;
+        }
+        
+        /* Blur instructions when overlays are active */
+        .page-content-overlay.active ~ .site-instructions {
+            filter: blur(3px);
+            opacity: 0.3;
         }
         
         .site-instructions:hover {
@@ -1741,6 +1797,15 @@
             z-index: 10000 !important;
         }
         
+        /* Default mode close button visibility - light over dark overlay */
+        body:not(.dark-mode):not(.red-mode):not(.green-mode):not(.purple-mode) .page-content-overlay.active .close-btn,
+        body:not(.dark-mode):not(.red-mode):not(.green-mode):not(.purple-mode) .video-layout-container.active .close-btn {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-color: rgba(255, 255, 255, 0.4) !important;
+            color: rgba(255, 255, 255, 1) !important;
+            opacity: 1 !important;
+        }
+        
         .page-content-overlay.active ~ * .close-btn:hover,
         .video-layout-container.active .close-btn:hover {
             background: rgba(255, 255, 255, 0.2) !important;
@@ -1749,6 +1814,15 @@
             opacity: 1;
             transform: translateY(-1px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7) !important;
+        }
+        
+        /* Default mode close button hover */
+        body:not(.dark-mode):not(.red-mode):not(.green-mode):not(.purple-mode) .page-content-overlay.active .close-btn:hover,
+        body:not(.dark-mode):not(.red-mode):not(.green-mode):not(.purple-mode) .video-layout-container.active .close-btn:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+            border-color: rgba(255, 255, 255, 0.6) !important;
+            color: rgba(255, 255, 255, 1) !important;
+            transform: translateY(-1px);
         }
 
         @media (max-width: 768px) {
