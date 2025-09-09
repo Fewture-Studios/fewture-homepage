@@ -4,11 +4,14 @@ An interactive 3D website with AI-powered chatbot capabilities, built with Three
 
 ## Features
 
-- **3D Interactive Experience**: Built with Three.js for immersive visuals
-- **AI Chatbot**: Powered by OpenAI's GPT-3.5-turbo
-- **Responsive Design**: Works on desktop and mobile devices
-- **Multiple Themes**: Dynamic theming system (Default/IRL/Fund/Dark)
-- **Serverless Backend**: AWS Lambda + API Gateway
+- **3D Interactive Experience**: Built with Three.js for immersive visuals with dynamic particle systems
+- **AI Chatbot**: Powered by OpenAI's GPT-3.5-turbo with contextual responses
+- **Responsive Design**: Fully responsive across desktop, tablet, and mobile devices
+- **Dynamic Theming**: 5 theme modes (Default, IRL/Dark, Fund/Green, Willie/Red, MAL/Purple)
+- **Video Integration**: Embedded video players with custom thumbnails for each project
+- **Interactive Navigation**: Dropdown menus and overlay system for seamless content browsing
+- **Page Content System**: Dynamic content loading for Terms, Privacy, Careers, Contact, About, Team, and Partners
+- **Serverless Backend**: AWS Lambda + API Gateway with CORS support
 - **Global CDN**: CloudFront for fast content delivery
 
 ## Project Structure

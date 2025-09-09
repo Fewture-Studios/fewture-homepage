@@ -625,7 +625,7 @@
         
         .purple-mode .status-overlay {
             color: #ffffff !important;
-            border-color: #ffffff !important;
+            border-color: rgba(255, 255, 255, 0.4) !important;
         }
 
         .status-overlay:hover {
@@ -858,7 +858,7 @@
             padding: clamp(8px, 2vw, 15px);
             font-size: clamp(12px, 2.5vw, 16px);
             line-height: clamp(1.2, 1.4, 1.6);
-            border-bottom: 1px solid var(--border-color, #000000);
+            /* border-bottom: 1px solid var(--border-color, #000000); */
             position: relative;
         }
         
@@ -1733,9 +1733,9 @@
         /* Enhanced visibility when overlays are active */
         .page-content-overlay.active ~ * .close-btn,
         .video-layout-container.active .close-btn {
-            background: rgba(0, 0, 0, 0.9) !important;
-            border-color: rgba(255, 255, 255, 0.2) !important;
-            color: rgba(255, 255, 255, 0.8) !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+            color: rgba(255, 255, 255, 0.9) !important;
             opacity: 1;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
             z-index: 10000 !important;
@@ -1743,8 +1743,8 @@
         
         .page-content-overlay.active ~ * .close-btn:hover,
         .video-layout-container.active .close-btn:hover {
-            background: rgba(0, 0, 0, 1) !important;
-            border-color: rgba(255, 255, 255, 0.4) !important;
+            background: rgba(255, 255, 255, 0.2) !important;
+            border-color: rgba(255, 255, 255, 0.5) !important;
             color: rgba(255, 255, 255, 1) !important;
             opacity: 1;
             transform: translateY(-1px);

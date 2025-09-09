@@ -10,20 +10,30 @@
 
 ### Key Components
 1. **3D Scene Manager**
-   - Handles 3D object loading and rendering
-   - Manages camera controls and animations
-   - Handles responsive design for different screen sizes
+   - Three.js scene with dynamic particle systems
+   - GLTF model loading and rendering
+   - Camera controls with zoom animations
+   - Responsive viewport handling and label positioning
+   - Post-processing effects and fog systems
 
 2. **UI Components**
-   - Navigation system
-   - Chat interface
-   - Video player
-   - Overlay system
+   - Dynamic navigation with dropdown menus
+   - AI-powered chat interface with message history
+   - Video players with custom thumbnails and overlays
+   - Page content overlay system
+   - Theme status indicator and cycling
 
 3. **State Management**
-   - Theme management
-   - User interactions
-   - Application state
+   - 5-mode theme system (Default, IRL, Fund, Willie, MAL)
+   - Overlay state management (video/page/none)
+   - Navigation section tracking
+   - Close button dynamic positioning
+
+4. **Content Systems**
+   - Dynamic page content generation (Terms, Privacy, Careers, etc.)
+   - Video content switching with proper cleanup
+   - Team member bio display
+   - Project showcase functionality
 
 ## Backend Architecture
 
