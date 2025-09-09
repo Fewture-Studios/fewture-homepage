@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Fewture</title>
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
     <style>
@@ -12,7 +12,23 @@
             background-color: transparent; 
             color: #000000; 
             font-family: 'Inter', sans-serif; 
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            touch-action: none;
+            -webkit-overflow-scrolling: touch;
         }
+        
+        html {
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+            position: fixed;
+            touch-action: none;
+        }
+
         canvas { 
             display: block; 
             position: fixed; 
@@ -133,11 +149,9 @@
             position: fixed;
             bottom: 40px;
             left: 20px;
-            width: auto;
             min-width: 350px;
             max-width: 500px;
             height: auto;
-            min-height: 300px;
             z-index: 3;
             font-family: 'Courier New', 'Monaco', monospace;
             font-weight: normal;
@@ -150,7 +164,7 @@
         }
 
         #chat-messages {
-            height: 200px;
+            height: 195px;
             overflow-y: auto;
             padding: clamp(8px, 2vw, 15px);
             font-family: 'Courier New', 'Monaco', monospace;
@@ -222,20 +236,27 @@
         #chat-input-container {
             display: flex;
             gap: clamp(5px, 1.5vw, 10px);
-            padding: 0 clamp(8px, 2vw, 15px);
+            padding: clamp(2px, 0.5vw, 4px) clamp(8px, 2vw, 15px);
             align-items: stretch;
+            background-color: rgba(220, 220, 220, 0.8);
+            border: 1px solid rgba(150, 150, 150, 0.6);
+            border-radius: 3px;
+            margin-top: clamp(3px, 0.8vw, 6px);
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         #chat-input {
             flex: 1;
-            padding: clamp(8px, 2vw, 12px);
+            padding: 0;
             border: none;
             background: transparent;
-            font-family: 'Courier New', 'Monaco', monospace;
-            font-size: clamp(12px, 2.5vw, 16px);
-            color: var(--text-color, #000000);
+            font-family: 'Monospace', monospace;
+            font-size: clamp(9px, 1.8vw, 12px);
+            color: #333333;
             outline: none;
-            border-bottom: 1px solid var(--border-color, #000000);
             min-width: 0;
         }
 
@@ -248,13 +269,12 @@
         }
 
         #chat-send {
-            padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 20px);
+            padding: 0 clamp(8px, 2vw, 12px);
             background: transparent;
-            color: var(--text-color, #000000);
+            color: #333333;
             border: none;
-            border-bottom: 1px solid var(--border-color, #000000);
-            font-family: 'Courier New', 'Monaco', monospace;
-            font-size: clamp(12px, 2.5vw, 16px);
+            font-family: 'Monospace', monospace;
+            font-size: clamp(9px, 1.8vw, 12px);
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
@@ -279,13 +299,13 @@
 
         /* Dark mode */
         .dark-mode {
-            --text-color: #ffffff;
-            --user-color: #ffffff;
-            --bot-color: #ffffff;
-            --accent-color: #cccccc;
-            --border-color: #ffffff;
-            --placeholder-color: rgba(255, 255, 255, 0.6);
-            --hover-bg: rgba(255, 255, 255, 0.1);
+            --text-color: #e6e6e6;
+            --user-color: #e6e6e6;
+            --bot-color: #e6e6e6;
+            --accent-color: #d9d9d9;
+            --border-color: #e6e6e6;
+            --placeholder-color: rgba(230, 230, 230, 0.6);
+            --hover-bg: rgba(230, 230, 230, 0.1);
         }
 
         .dark-mode body {
@@ -319,42 +339,57 @@
         }
 
         .dark-mode .chat-message {
-            background-color: rgba(35, 35, 35, 0.8);
-            border-color: rgba(105, 105, 105, 0.6);
-            color: #cccccc;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            background-color: rgba(45, 45, 45, 0.8);
+            border-color: rgba(120, 120, 120, 0.6);
+            color: #e6e6e6;
+            box-shadow: 0 0 10px rgba(230, 230, 230, 0.2);
         }
 
         .dark-mode #chat-container {
             background: transparent;
             border: none;
         }
+        
+        .dark-mode #chat-input-container {
+            background-color: rgba(45, 45, 45, 0.8);
+            border-color: rgba(120, 120, 120, 0.6);
+        }
+        
+        .dark-mode #chat-input {
+            background: transparent;
+            border: none;
+            color: #e6e6e6;
+        }
+        
+        .dark-mode #chat-send {
+            color: #e6e6e6;
+        }
 
         /* Red Willie mode */
         .red-mode {
-            --text-color: #ff0000;
-            --user-color: #ff0000;
-            --bot-color: #ff0000;
-            --accent-color: #cc0000;
-            --border-color: #ff0000;
-            --placeholder-color: rgba(255, 0, 0, 0.6);
-            --hover-bg: rgba(255, 0, 0, 0.1);
+            --text-color: #f5d4d4;
+            --user-color: #f5d4d4;
+            --bot-color: #f5d4d4;
+            --accent-color: #f0c7c7;
+            --border-color: #f5d4d4;
+            --placeholder-color: rgba(245, 212, 212, 0.6);
+            --hover-bg: rgba(245, 212, 212, 0.1);
         }
 
         /* Green Fund mode */
         .green-mode {
-            --text-color: #7fb069;
-            --user-color: #7fb069;
-            --bot-color: #7fb069;
-            --accent-color: #a3c585;
-            --border-color: #7fb069;
-            --placeholder-color: rgba(127, 176, 105, 0.6);
-            --hover-bg: rgba(127, 176, 105, 0.1);
+            --text-color: #d9e8d2;
+            --user-color: #d9e8d2;
+            --bot-color: #d9e8d2;
+            --accent-color: #e2eedc;
+            --border-color: #d9e8d2;
+            --placeholder-color: rgba(217, 232, 210, 0.6);
+            --hover-bg: rgba(217, 232, 210, 0.1);
         }
 
         .red-mode body {
-            background-color: #330000;
-            color: #ff0000;
+            background-color: #5a4545;
+            color: #f5d4d4;
         }
 
         .red-mode canvas {
@@ -367,8 +402,8 @@
         }
 
         .green-mode body {
-            background-color: #2d3e2d;
-            color: #7fb069;
+            background-color: #5a5f5a;
+            color: #d9e8d2;
         }
 
         .green-mode canvas {
@@ -409,17 +444,17 @@
         }
 
         .red-mode .info-label {
-            background-color: rgba(255, 0, 0, 0.1);
-            border-color: rgba(255, 0, 0, 0.7);
-            color: #ff0000;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+            background-color: rgba(242, 179, 179, 0.1);
+            border-color: rgba(242, 179, 179, 0.7);
+            color: #f2b3b3;
+            box-shadow: 0 0 15px rgba(242, 179, 179, 0.5);
         }
 
         .red-mode .chat-message {
-            background-color: rgba(255, 0, 0, 0.15);
-            border-color: rgba(255, 0, 0, 0.8);
-            color: #ff0000;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+            background-color: rgba(245, 212, 212, 0.15);
+            border-color: rgba(245, 212, 212, 0.8);
+            color: #f5d4d4;
+            box-shadow: 0 0 15px rgba(245, 212, 212, 0.5);
         }
 
         .red-mode #chat-container {
@@ -427,23 +462,53 @@
             border: none;
         }
 
+        .red-mode #chat-input-container {
+            background-color: rgba(245, 212, 212, 0.15);
+            border-color: rgba(245, 212, 212, 0.8);
+        }
+        
+        .red-mode #chat-input {
+            background: transparent;
+            border: none;
+            color: #f5d4d4;
+        }
+        
+        .red-mode #chat-send {
+            color: #f5d4d4;
+        }
+
         .green-mode .info-label {
-            background-color: rgba(127, 176, 105, 0.15);
-            border-color: rgba(163, 197, 133, 0.6);
-            color: #7fb069;
-            box-shadow: 0 0 8px rgba(127, 176, 105, 0.3);
+            background-color: rgba(201, 220, 192, 0.15);
+            border-color: rgba(214, 229, 205, 0.6);
+            color: #c9dcc0;
+            box-shadow: 0 0 8px rgba(201, 220, 192, 0.3);
         }
 
         .green-mode .chat-message {
-            background-color: rgba(127, 176, 105, 0.2);
-            border-color: rgba(163, 197, 133, 0.7);
-            color: #7fb069;
-            box-shadow: 0 0 8px rgba(127, 176, 105, 0.3);
+            background-color: rgba(217, 232, 210, 0.2);
+            border-color: rgba(226, 238, 220, 0.7);
+            color: #d9e8d2;
+            box-shadow: 0 0 8px rgba(217, 232, 210, 0.3);
         }
 
         .green-mode #chat-container {
             background: transparent;
             border: none;
+        }
+
+        .green-mode #chat-input-container {
+            background-color: rgba(217, 232, 210, 0.2);
+            border-color: rgba(226, 238, 220, 0.7);
+        }
+        
+        .green-mode #chat-input {
+            background: transparent;
+            border: none;
+            color: #d9e8d2;
+        }
+        
+        .green-mode #chat-send {
+            color: #d9e8d2;
         }
 
         .purple-mode .info-label {
@@ -454,15 +519,35 @@
         }
 
         .purple-mode .chat-message {
-            background-color: rgba(177, 156, 217, 0.2);
-            border-color: rgba(177, 156, 217, 0.7);
-            color: #b19cd9;
-            box-shadow: 0 0 12px rgba(177, 156, 217, 0.4);
+            background-color: rgba(200, 185, 230, 0.2);
+            border-color: rgba(200, 185, 230, 0.7);
+            color: #c8b9e6;
+            box-shadow: 0 0 12px rgba(200, 185, 230, 0.4);
         }
 
         .purple-mode #chat-container {
             background: transparent;
             border: none;
+        }
+        
+        .purple-mode #chat-input-container {
+            background-color: rgba(200, 185, 230, 0.2);
+            border-color: rgba(200, 185, 230, 0.7);
+        }
+        
+        .purple-mode #chat-input {
+            background: transparent;
+            border: none;
+            color: #c8b9e6;
+        }
+        
+        .purple-mode #chat-input::placeholder {
+            color: #c8b9e6;
+            opacity: 0.7;
+        }
+        
+        .purple-mode #chat-send {
+            color: #c8b9e6;
         }
 
         /* Smooth mode transitions without glitch effects */
@@ -478,8 +563,11 @@
             transform: translateX(-50%);
             display: flex;
             gap: 20px;
-            z-index: 1000;
-            pointer-events: auto;
+            z-index: 20;
+            transition: all 0.5s ease;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 90vw;
         }
 
         /* Navigation transitions when video is active */
@@ -496,24 +584,46 @@
         .status-overlay {
             position: relative;
             font-family: 'Courier New', 'Monaco', monospace;
-            font-size: clamp(8px, 1.8vw, 12px);
-            color: #ffffff;
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            padding: 8px 16px;
-            border-radius: 3px;
-            backdrop-filter: blur(5px);
+            font-size: clamp(10px, 2vw, 14px);
+            font-weight: bold;
+            color: #000000;
+            background: transparent;
+            border: 1px solid #000000;
+            padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
             cursor: pointer;
             transition: all 0.3s ease;
-            user-select: none;
-            pointer-events: auto;
-            animation: float 3s ease-in-out infinite;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0;
+            backdrop-filter: blur(5px);
+            border-radius: 0;
             white-space: nowrap;
+        }
+        
+        /* Dark mode header text visibility */
+        .dark-mode .status-overlay {
+            color: #ffffff !important;
+            border-color: #ffffff !important;
+        }
+        
+        .red-mode .status-overlay {
+            color: #ffffff !important;
+            border-color: #ffffff !important;
+        }
+        
+        .green-mode .status-overlay {
+            color: #ffffff !important;
+            border-color: #ffffff !important;
+        }
+        
+        .purple-mode .status-overlay {
+            color: #ffffff !important;
+            border-color: #ffffff !important;
         }
 
         .status-overlay:hover {
-            background: rgba(0, 0, 0, 0.9);
-            border-color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #000000;
             transform: translateY(-2px);
         }
 
@@ -526,17 +636,16 @@
             position: absolute;
             top: 100%;
             left: 0;
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #000000;
             border-radius: 3px;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
             width: 100%;
-            z-index: 1001;
+            z-index: 10000;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
             transition: all 0.3s ease;
-            pointer-events: none;
         }
 
         .dropdown-menu.show {
@@ -547,14 +656,17 @@
         }
 
         .dropdown-item {
+            display: block;
+            padding: 10px 14px;
+            color: #000000;
+            text-decoration: none;
             font-family: 'Courier New', 'Monaco', monospace;
-            font-size: clamp(8px, 1.6vw, 11px);
-            color: #ffffff;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: clamp(9px, 1.7vw, 12px);
+            font-weight: bold;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s ease;
             white-space: nowrap;
+            cursor: pointer;
         }
 
         .dropdown-item:last-child {
@@ -562,8 +674,8 @@
         }
 
         .dropdown-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
+            background: rgba(0, 0, 0, 0.1);
+            color: #000000;
         }
         
         /* Footer Navigation */
@@ -581,11 +693,11 @@
         .footer-nav-item {
             position: relative;
             font-family: 'Courier New', 'Monaco', monospace;
-            font-size: clamp(6px, 1.2vw, 9px);
+            font-size: clamp(10px, 2.5vw, 14px);
             color: #000000;
             background: rgba(255, 255, 255, 0.8);
             border: 1px solid rgba(0, 0, 0, 0.4);
-            padding: 4px 8px;
+            padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 16px);
             border-radius: 3px;
             backdrop-filter: blur(5px);
             cursor: pointer;
@@ -639,7 +751,7 @@
             top: 0;
             left: 0;
             width: 100vw;
-            height: 100vh;
+            height: auto;
             z-index: 15;
             opacity: 0;
             visibility: hidden;
@@ -647,22 +759,39 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
+            padding-top: 80px;
         }
         
-        .page-content-overlay .page-content {
-            width: clamp(400px, 50vw, 600px);
-            height: clamp(300px, 60vh, 500px);
+        /* Desktop-specific styles - disable vh */
+        @media (min-width: 769px) {
+            .page-content-overlay {
+                height: auto;
+                min-height: unset;
+                max-height: none;
+            }
+        }
+        
+        .page-content-overlay #chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: clamp(320px, 25vw, 400px);
+            height: clamp(200px, 20vh, 250px);
             background-color: rgba(0, 0, 0, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
             backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
-            overflow: visible;
-            transform: scale(0.9);
-            transition: transform 0.4s ease;
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+            font-family: 'Courier New', 'Monaco', monospace;
+            z-index: 16;
+            transition: all 0.3s ease;
         }
         
         .page-content-overlay.active {
@@ -691,13 +820,202 @@
             box-sizing: border-box;
         }
         
-        /* Team-specific styling */
-        .team-grid {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
+        /* Floating container system for MAL project */
+        .floating-container {
+            position: fixed;
+            z-index: 1000;
+            font-family: 'Courier New', 'Monaco', monospace;
+            background: transparent;
+            backdrop-filter: none;
+            border: none;
+            pointer-events: auto;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .floating-container.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .floating-container .container-content {
+            background-color: rgba(220, 220, 220, 0.8);
+            border: 1px solid rgba(150, 150, 150, 0.6);
+            border-radius: 3px;
+            padding: clamp(8px, 2vw, 15px);
+            font-size: clamp(12px, 2.5vw, 16px);
+            line-height: clamp(1.2, 1.4, 1.6);
+            border-bottom: 1px solid var(--border-color, #000000);
+            position: relative;
+        }
+        
+        .floating-container .container-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.03) 2px,
+                rgba(0, 0, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .floating-container .container-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--text-color, #000000);
+        }
+        
+        .floating-container .container-title::before {
+            content: ':: ';
+        }
+        
+        /* Size variations */
+        .floating-container.size-small {
+            width: clamp(200px, 25vw, 300px);
+            min-height: 120px;
+        }
+        
+        .floating-container.size-medium {
+            width: clamp(250px, 35vw, 400px);
+            min-height: 150px;
+        }
+        
+        .floating-container.size-large {
+            width: clamp(300px, 45vw, 500px);
+            min-height: 200px;
+        }
+        
+        /* MAL content grid layout */
+        .mal-content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
             gap: 15px;
             width: 100%;
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        .mal-profile, .mal-background, .mal-digital, .mal-operations {
+            background-color: rgba(200, 185, 230, 0.2);
+            border: 1px solid rgba(200, 185, 230, 0.7);
+            border-radius: 3px;
+            padding: 15px;
+            font-family: 'Courier New', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #c8b9e6;
+            position: relative;
+            box-shadow: 0 0 12px rgba(200, 185, 230, 0.4);
+        }
+        
+        .mal-profile::before, .mal-background::before, .mal-digital::before, .mal-operations::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.03) 2px,
+                rgba(0, 0, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
+            border-radius: 3px;
+        }
+        
+        .mal-profile h2, .mal-profile h3 {
+            margin: 0 0 8px 0;
+            color: #c8b9e6;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .mal-background h4, .mal-digital h4, .mal-operations h4 {
+            margin: 0 0 8px 0;
+            font-weight: bold;
+            color: #c8b9e6;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .mal-digital h5, .mal-operations h5 {
+            margin: 8px 0 4px 0;
+            font-size: 12px;
+            font-weight: bold;
+            color: #c8b9e6;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .mal-profile p, .mal-background p, .mal-digital p, .mal-operations p {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .profile-subtitle, .profile-tagline {
+            font-size: 12px;
+            margin: 4px 0;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .profile-tagline {
+            font-style: italic;
+        }
+        
+        .mal-photo {
+            width: 120px;
+            height: 120px;
+            margin: 10px 0;
+            border-radius: 3px;
+            overflow: hidden;
+            border: 1px solid rgba(200, 185, 230, 0.7);
+        }
+        
+        .mal-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+        }
+        
+        /* Ensure containers don't overlap chat */
+        @media (max-width: 768px) {
+            .mal-content-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto;
+                max-height: 55vh;
+            }
+            
+            .floating-container {
+                right: auto !important;
+                left: 50% !important;
+                transform: translateX(-50%) scale(0.9);
+                width: clamp(280px, 80vw, 350px) !important;
+            }
+            
+            .floating-container.active {
+                transform: translateX(-50%) scale(1);
+            }
+            
+            .floating-container:nth-child(1) { top: 10% !important; }
+            .floating-container:nth-child(2) { top: 25% !important; }
+            .floating-container:nth-child(3) { top: 40% !important; }
+            .floating-container:nth-child(4) { top: 55% !important; }
         }
         
         .team-member {
@@ -705,22 +1023,45 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            min-height: 200px;
-            flex: 1;
+            margin-bottom: 30px;
+        }
+        
+        /* Desktop horizontal team layout */
+        @media (min-width: 769px) {
+            .team-grid {
+                display: flex;
+                flex-direction: row;
+                gap: 20px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .team-member {
+                flex: 1;
+                min-width: 280px;
+                max-width: 320px;
+            }
         }
         
         .team-photo {
             width: 80px;
             height: 80px;
             background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 10px;
             font-size: 12px;
             color: rgba(255, 255, 255, 0.7);
+            overflow: hidden;
+        }
+        
+        .team-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
         }
         
         .team-info {
@@ -762,6 +1103,48 @@
             padding: 15px;
             background: transparent;
             box-sizing: border-box;
+            position: relative;
+        }
+        
+        .page-content-container::after {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 300px;
+            background: linear-gradient(180deg, 
+                transparent 0%, 
+                rgba(0, 0, 0, 0.1) 20%,
+                rgba(0, 0, 0, 0.3) 40%,
+                rgba(0, 0, 0, 0.6) 60%,
+                rgba(0, 0, 0, 0.8) 80%,
+                rgba(0, 0, 0, 0.95) 100%);
+            pointer-events: none;
+            z-index: 14;
+        }
+        
+        /* Mobile responsiveness for page content */
+        @media (max-width: 768px) {
+            .page-content-overlay {
+                align-items: flex-start;
+                padding-top: 100px;
+            }
+            
+            .page-content-overlay .page-content {
+                width: 90vw;
+                height: auto;
+                max-width: 90vw;
+                max-height: calc(100vh - 200px);
+                margin-top: 0;
+                margin-bottom: 120px;
+            }
+            
+            .page-content-container {
+                padding: 10px;
+                max-height: calc(100vh - 450px);
+                overflow-y: auto;
+            }
         }
         
         .page-section-title {
@@ -775,6 +1158,20 @@
             background-color: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
+        }
+        
+        /* Desktop titles visible, mobile hidden */
+        @media (min-width: 769px) {
+            .page-section-title {
+                display: block;
+                margin-bottom: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .page-section-title {
+                display: none;
+            }
         }
 
         /* Video layout container */
@@ -792,8 +1189,9 @@
         }
         
         .video-layout-container.active {
-            display: flex;
-            flex-direction: row;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            grid-template-rows: 1fr;
             align-items: center;
             justify-content: flex-start;
             opacity: 1;
@@ -803,48 +1201,68 @@
             gap: 30px;
         }
         
-        /* Video overlay - fits content */
+        /* Video overlay - minimal stroke outline */
         .video-overlay {
-            width: fit-content;
+            max-width: 90vw;
             height: fit-content;
-            max-width: calc(100vw - 400px);
-            max-height: calc(100vh - 200px);
+            max-height: 60vh;
             border: 2px solid var(--text-color, #000000);
             background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(10px);
-            padding: 15px;
-            border-radius: 8px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
-            transform: scale(0.95);
-            opacity: 0;
-            animation: videoFadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            opacity: 1;
+            transform: scale(1);
+            font-family: 'Courier New', 'Monaco', monospace;
+            position: relative;
+            grid-column: 2;
+            grid-row: 1;
+            justify-self: center;
+            align-self: center;
         }
 
         .video-overlay video {
             width: 100%;
             height: auto;
-            border-radius: 4px;
+            border-radius: 2px;
             object-fit: contain;
+            position: relative;
+            z-index: 2;
+            display: block;
         }
 
         .close-btn {
-            align-self: flex-end;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #ffffff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 25;
+            background-color: var(--text-color, #ffffff);
+            border: 2px solid var(--text-color, #ffffff);
+            color: var(--bg-color, #000000);
             font-family: 'Courier New', monospace;
-            font-size: 14px;
-            font-weight: normal;
-            padding: 6px 10px;
-            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 30px;
+            width: 32px;
+            height: 32px;
             text-align: center;
-            backdrop-filter: blur(5px);
+            line-height: 1;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @media (max-width: 1024px) {
+            .close-btn {
+                position: static;
+                align-self: center;
+                margin-top: 15px;
+            }
         }
 
         .close-btn:hover {
@@ -878,49 +1296,54 @@
 
         /* Chat positioning in video layout */
         #chat-container.video-content-active {
-            width: 300px;
-            height: calc(100vh - 160px);
-            min-height: 500px;
-            max-height: 700px;
-            position: relative;
+            width: 350px;
+            height: calc(100vh - 200px);
+            min-height: clamp(200px, 30vh, 400px);
+            max-height: 600px;
+            position: static;
             z-index: 15;
             flex-shrink: 0;
-            align-self: flex-start;
-            margin-top: 80px;
+            align-self: center;
+            margin-top: 0px;
+            grid-column: 1;
+            grid-row: 1;
+            bottom: auto;
+            left: auto;
         }
         
         /* Responsive adjustments */
         @media (max-width: 1024px) {
             .video-layout-container.active {
                 grid-template-columns: 1fr;
-                grid-template-rows: auto auto auto;
+                grid-template-rows: auto auto;
             }
             
             .video-overlay {
                 grid-column: 1;
-                grid-row: 2;
+                grid-row: 1;
             }
             
             #chat-container.video-content-active {
                 grid-column: 1;
-                grid-row: 3;
+                grid-row: 2;
                 width: 100%;
                 max-width: none;
+                min-height: clamp(120px, 20vh, 200px);
                 max-height: 200px;
+                position: static;
+                bottom: auto;
+                left: auto;
+                transform: none;
             }
         }
+        
 
 
-        .video-overlay video {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
 
         .video-overlay .video-close {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: -50px;
+            left: calc(87%);
             background: var(--text-color, #000000);
             color: var(--bg-color, #ffffff);
             border: none;
@@ -943,96 +1366,147 @@
 
         /* Comprehensive Responsive Design with Dynamic Text */
         
+        /* Desktop screens (769px and above) - Chat stays on left */
+        @media (min-width: 769px) {
+            #chat-container {
+                position: fixed !important;
+                bottom: 40px !important;
+                left: 20px !important;
+                transform: none !important;
+                width: 350px !important;
+                max-width: 450px !important;
+                height: 300px !important;
+                max-height: 400px !important;
+            }
+            
+            #chat-input-container {
+                position: relative !important;
+                bottom: auto !important;
+                left: auto !important;
+                transform: none !important;
+                width: 100% !important;
+                margin: clamp(3px, 0.8vw, 6px) 0 0 0 !important;
+            }
+        }
+
         /* Tablet and smaller desktop (768px and below) */
         @media (max-width: 768px) {
+            
             /* Logo scaling */
+            .video-overlay {
+                max-width: 90vw;
+                height: fit-content;
+                max-height: 60vh;
+                border: 2px solid var(--text-color, #000000);
+                background: rgba(0, 0, 0, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 15px;
+                border-radius: 8px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+                opacity: 1;
+                transform: scale(1);
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .video-overlay video {
+                width: 100%;
+                height: auto;
+                border-radius: 4px;
+                object-fit: contain;
+            }
+
+            .close-btn {
+                align-self: flex-end;
+                background-color: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                color: #ffffff;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                font-weight: normal;
+                padding: 6px 10px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                min-width: 30px;
+                text-align: center;
+                backdrop-filter: blur(5px);
+            }
+
+            .close-btn:hover {
+                background-color: rgba(255, 255, 255, 0.15);
+                border-color: rgba(255, 255, 255, 0.5);
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            @keyframes videoFadeIn {
+                0% { 
+                    opacity: 0; 
+                    transform: scale(0.9);
+                }
+                100% { 
+                    opacity: 1; 
+                    transform: scale(1);
+                }
+            }
+        
+            @keyframes fadeOut {
+                0% { 
+                    opacity: 1; 
+                    transform: scale(1);
+                }
+                100% { 
+                    opacity: 0; 
+                    transform: scale(0.9);
+                }
+            }
+            
             #logo-container {
                 top: clamp(10px, 2vw, 15px);
                 left: clamp(10px, 2vw, 15px);
                 width: clamp(100px, 15vw, 120px);
             }
-            
-            #logo-container img {
-                height: clamp(28px, 4vw, 32px);
-            }
-            
-            /* Chat container responsive */
-            #chat-container {
-                width: clamp(80vw, 85vw, 90vw);
-                left: 50%;
-                transform: translateX(-50%);
-                height: clamp(240px, 35vh, 280px);
-                bottom: clamp(8%, 12%, 15%);
-            }
-            
-            #chat-container.video-content-active {
-                width: clamp(85vw, 90vw, 95vw);
-                height: clamp(160px, 25vh, 180px);
-                bottom: clamp(4%, 6%, 8%);
-            }
-            
-            /* Dynamic text condensing */
-            .chat-message {
-                font-size: clamp(10px, 2vw, 14px);
-                line-height: clamp(1.1, 1.3, 1.4);
-                margin-bottom: clamp(3px, 0.8vw, 6px);
-            }
-            
-            #chat-input, #chat-send {
-                font-size: clamp(11px, 2.2vw, 14px);
-                padding: clamp(6px, 1.5vw, 10px);
-            }
-            
-            /* Navigation bar responsive */
-            .navigation-bar {
-                top: clamp(10px, 2vw, 15px);
-                gap: clamp(8px, 2vw, 15px);
-            }
-            
-            .status-overlay {
-                font-size: clamp(7px, 1.5vw, 10px);
-                padding: clamp(4px, 0.8vw, 6px) clamp(8px, 1.5vw, 12px);
-            }
-            
-            /* Video overlay responsive */
-            .video-overlay {
-                width: clamp(80vw, 85vw, 90vw);
-                max-width: 700px;
-                top: clamp(25%, 30%, 35%);
-                padding: clamp(10px, 2vw, 15px);
-            }
-        }
 
-        /* Mobile (480px and below) - Ultra Condensed */
-        @media (max-width: 480px) {
-            /* Logo mobile scaling */
-            #logo-container {
-                top: clamp(5px, 1.5vw, 10px);
-                left: clamp(5px, 1.5vw, 10px);
-                width: clamp(80px, 12vw, 100px);
-            }
-            
-            #logo-container img {
-                height: clamp(22px, 3.5vw, 28px);
-            }
-            
-            /* Chat mobile layout - ultra condensed */
             #chat-container {
-                width: clamp(92vw, 95vw, 98vw);
-                height: clamp(200px, 30vh, 240px);
-                bottom: clamp(8px, 2vh, 15px);
+                position: fixed !important;
+                width: clamp(300px, 85vw, 400px) !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                height: clamp(120px, 18vh, 150px) !important;
+                bottom: 80px !important;
+                z-index: 1000 !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            
+            #chat-input-container {
+                position: absolute !important;
+                bottom: clamp(4px, 1vw, 8px) !important;
+                left: 0 !important;
+                right: 0 !important;
+                transform: none !important;
+                width: calc(100% - clamp(16px, 4vw, 30px)) !important;
+                margin: 0 clamp(8px, 2vw, 15px) !important;
+                z-index: 10 !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            
+            #welcome-text {
+                font-size: clamp(16px, 4vw, 24px);
+                top: clamp(80px, 15vh, 100px);
                 left: 50%;
                 transform: translateX(-50%);
-            }
-            
-            #chat-container.video-content-active {
-                width: clamp(92vw, 95vw, 98vw);
-                height: clamp(140px, 20vh, 160px);
-                bottom: clamp(4px, 1vh, 8px);
+                width: 90%;
+                text-align: center;
             }
             
             #chat-messages {
-                height: clamp(140px, 22vh, 160px);
+                height: clamp(80px, 15vh, 100px);
                 font-size: clamp(10px, 2vw, 13px);
                 padding: clamp(4px, 1vw, 8px);
                 line-height: clamp(1.1, 1.2, 1.3);
@@ -1056,25 +1530,21 @@
             
             /* Navigation bar mobile */
             .navigation-bar {
-                top: clamp(5px, 1.5vw, 10px);
+                top: clamp(60px, 1vh, 150px);
                 gap: clamp(4px, 1vw, 8px);
                 flex-wrap: wrap;
+                width: clamp(320px, 90vw, 450px);
                 justify-content: center;
                 max-width: 90vw;
+                left: 50%;
+                transform: translateX(-50%);
             }
             
             .status-overlay {
-                font-size: clamp(6px, 1.2vw, 8px);
-                padding: clamp(3px, 0.5vw, 4px) clamp(6px, 1vw, 8px);
+                font-size: clamp(10px, 2.5vw, 14px);
+                padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 16px);
             }
             
-            /* Video overlay mobile - condensed */
-            .video-overlay {
-                width: clamp(92vw, 95vw, 98vw);
-                max-width: none;
-                top: clamp(15%, 20%, 25%);
-                padding: clamp(6px, 1.5vw, 10px);
-            }
         }
         
         /* Large screens (1200px and above) - Enhanced Text */
@@ -1112,9 +1582,8 @@
             }
             
             .video-overlay {
-                width: clamp(60vw, 65vw, 70vw);
-                max-width: 1000px;
-                padding: clamp(20px, 1.5vw, 25px);
+                max-width: 90vw;
+                max-height: 60vh;
             }
         }
         
@@ -1144,8 +1613,50 @@
             }
             
             .video-overlay {
-                width: clamp(55vw, 60vw, 65vw);
-                max-width: 1200px;
+                max-width: 90vw;
+                max-height: 60vh;
+            }
+        }
+
+        /* Theme Status Button */
+        .theme-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: transparent;
+            border: 1px solid var(--border-color, #000000);
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            color: var(--text-color, #000000);
+            font-size: 11px;
+            font-weight: normal;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .theme-status:hover {
+            opacity: 1;
+        }
+        
+        /* Close button hover state */
+        .close-btn:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        @media (max-width: 768px) {
+            .theme-status {
+                top: clamp(10px, 2vw, 15px);
+                right: clamp(10px, 2vw, 15px);
+                font-size: 10px;
+                padding: 6px 10px;
+                height: auto;
             }
         }
 
@@ -1154,12 +1665,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Monospace&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@700&display=swap" rel="stylesheet">
-    <link href="output.css" rel="stylesheet">
 </head>
 <body>
     <div id="logo-container"> 
         <img src="assets/images/Fewture-Studios-Typography.png" alt="Fewture Studios Logo">
     </div> 
+    
+    <!-- Theme Status -->
+    <div class="theme-status" id="theme-status" onclick="cycleTheme()">
+        <span id="current-theme">Default</span>
+    </div>
+    
     <div id="css2d-container"></div>
     
     <!-- VHS Terminal Style Chat Overlay -->
@@ -1191,18 +1707,18 @@
             <div class="dropdown-menu" id="projects-dropdown-menu">
                 <div class="dropdown-item" onclick="switchToProject('irl')">IRL</div>
                 <div class="dropdown-item" onclick="switchToProject('willie')">WILLIE</div>
-                <div class="dropdown-item" onclick="switchToProject('fund')">FEWTURE FUND</div>
+                <div class="dropdown-item" onclick="switchToProject('fund')">FUND</div>
                 <div class="dropdown-item" onclick="switchToProject('mal')">MAL</div>
             </div>
         </div>
         <div class="status-overlay" data-section="partners">PARTNERS</div>
-        <div class="status-overlay" data-section="contact">CONTACT</div>
     </div>
 
     <!-- Video Layout Container -->
     <div id="video-layout-container" class="video-layout-container">
+        <!-- Chat will be moved here by JavaScript -->
+        <button class="close-btn" id="video-close-btn" onclick="closeIRLVideo()" style="position: fixed; top: 20px; z-index: 1000; background: transparent; border: 1px solid var(--border-color, #000000); border-radius: 4px; padding: 8px 12px; font-family: 'Courier New', monospace; color: var(--text-color, #000000); font-size: 11px; font-weight: normal; opacity: 0.7; transition: all 0.3s ease; cursor: pointer; height: 40px; display: flex; align-items: center; width: 40px; justify-content: center;">×</button>
         <div id="irl-video-overlay" class="video-overlay">
-            <button class="close-btn" onclick="closeIRLVideo()">×</button>
             <video id="irl-video-player" controls>
                 <source src="./assets/video/IRL.mp4" type="video/mp4">
                 Your browser does not support the video tag.
@@ -1215,10 +1731,10 @@
     
     <!-- Page Content Overlay -->
     <div id="page-content-overlay" class="page-content-overlay">
-        <button class="close-btn" onclick="closePageContent()">×</button>
         <div id="page-content">
             <!-- Dynamic content will be inserted here -->
         </div>
+        <button class="close-btn" id="page-close-btn" onclick="closePageContent()" style="position: fixed; top: 20px; z-index: 1000; background: transparent; border: 1px solid var(--border-color, #000000); border-radius: 4px; padding: 8px 12px; font-family: 'Courier New', monospace; color: var(--text-color, #000000); font-size: 11px; font-weight: normal; opacity: 0.7; transition: all 0.3s ease; cursor: pointer; height: 40px; display: flex; align-items: center; width: 40px; justify-content: center;">×</button>
     </div>
     
     <script type="importmap">
@@ -1250,7 +1766,7 @@
         // Camera zoom state
         let originalCameraPosition = new THREE.Vector3();
         let isZoomedIn = false;
-        const ZOOM_DISTANCE = 8;
+        const ZOOM_DISTANCE = 15;
         const ZOOM_DURATION = 1000; // ms
 
         // --- Flowing Lines Effect Variables --- 
@@ -1300,7 +1816,12 @@
 
             // Camera
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.set(0, 3, 12); 
+            // Adjust camera position based on screen size
+            if (window.innerWidth <= 768) {
+                camera.position.set(0, 1, 12); // Lower Y position for mobile
+            } else {
+                camera.position.set(0, 3, 12);
+            } 
 
             // WebGL Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -1753,9 +2274,6 @@
                 currentLookAt.lerp(targetLookAt, 0.05); 
                 camera.lookAt(currentLookAt);
             }
-            camera.position.set(0, 3, 8);
-            camera.lookAt(0, 0, 0);
-            
             // Store original camera position
             originalCameraPosition.copy(camera.position);
 
@@ -1899,7 +2417,7 @@
             
             const videoLayoutContainer = document.getElementById('video-layout-container');
             const video = document.getElementById('irl-video-player');
-            const videoSource = video.querySelector('source');
+            const videoSource = video ? video.querySelector('source') : null;
             const chatContainer = document.getElementById('chat-container');
             const navBar = document.querySelector('.navigation-bar');
             
@@ -1907,17 +2425,22 @@
             currentOverlayType = 'video';
             
             // Set IRL video source
-            videoSource.src = './assets/video/IRL.mp4';
-            video.load();
+            if (videoSource) {
+                videoSource.src = './assets/video/IRL.mp4';
+                video.load();
+                video.style.display = 'block';
+            }
             
             // Show video layout container
             videoLayoutContainer.classList.add('active');
             video.currentTime = 0;
             
-            // Move chat into grid layout
-            videoLayoutContainer.appendChild(chatContainer);
+            // Add chat to grid layout without moving DOM element
             chatContainer.classList.add('video-content-active');
             navBar.classList.add('video-active');
+            
+            // Position close button dynamically
+            updateCloseButtonPosition();
             
             // Zoom camera closer to 3D object
             zoomCameraToObject();
@@ -1933,7 +2456,7 @@
             
             const videoLayoutContainer = document.getElementById('video-layout-container');
             const video = document.getElementById('irl-video-player');
-            const videoSource = video.querySelector('source');
+            const videoSource = video ? video.querySelector('source') : null;
             const chatContainer = document.getElementById('chat-container');
             const navBar = document.querySelector('.navigation-bar');
             
@@ -1941,17 +2464,22 @@
             currentOverlayType = 'video';
             
             // Set Fund video source
-            videoSource.src = './assets/video/FEWTUREFUND.mp4';
-            video.load();
+            if (videoSource) {
+                videoSource.src = './assets/video/FEWTUREFUND.mp4';
+                video.load();
+                video.style.display = 'block';
+            }
             
             // Show video layout container
             videoLayoutContainer.classList.add('active');
             video.currentTime = 0;
             
-            // Move chat into grid layout
-            videoLayoutContainer.appendChild(chatContainer);
+            // Add chat to grid layout without moving DOM element
             chatContainer.classList.add('video-content-active');
             navBar.classList.add('video-active');
+            
+            // Position close button dynamically
+            updateCloseButtonPosition();
             
             // Zoom camera closer to 3D object
             zoomCameraToObject();
@@ -1963,8 +2491,30 @@
             
             const videoLayoutContainer = document.getElementById('video-layout-container');
             const video = document.getElementById('irl-video-player');
-            const videoSource = video.querySelector('source');
+            const videoSource = video ? video.querySelector('source') : null;
             const chatContainer = document.getElementById('chat-container');
+            const navBar = document.querySelector('.navigation-bar');
+            
+            // Set current overlay type
+            currentOverlayType = 'video';
+            
+            // Set Willie video source
+            if (videoSource) {
+                videoSource.src = './assets/video/WILLIE.mp4';
+                video.load();
+                video.style.display = 'block';
+            }
+            
+            // Show video layout container
+            videoLayoutContainer.classList.add('active');
+            video.currentTime = 0;
+            
+            // Add chat to grid layout without moving DOM element
+            chatContainer.classList.add('video-content-active');
+            navBar.classList.add('video-active');
+            
+            // Position close button dynamically
+            updateCloseButtonPosition();
             
             // Zoom camera closer to 3D object
             zoomCameraToObject();
@@ -2002,12 +2552,45 @@
             pageContentOverlay.classList.add('active');
             videoBackground.classList.add('active');
             
-            // Transition navigation
-            navBar.classList.add('video-active');
+            // Keep navigation static - don't move it
+            
+            // Position close button dynamically based on theme status button
+            updateCloseButtonPosition();
             
             // Zoom camera closer to 3D object
             zoomCameraToObject();
         }
+        
+        function updateCloseButtonPosition() {
+            const themeStatus = document.getElementById('theme-status');
+            const pageCloseBtn = document.getElementById('page-close-btn');
+            const videoCloseBtn = document.getElementById('video-close-btn');
+            
+            if (themeStatus) {
+                // Wait for DOM to be fully rendered, then calculate position
+                setTimeout(() => {
+                    const themeRect = themeStatus.getBoundingClientRect();
+                    const viewportWidth = window.innerWidth;
+                    const themeRightEdge = viewportWidth - themeRect.right;
+                    const rightOffset = themeRightEdge + themeRect.width + 10; // Position to left of theme button with 10px gap
+                    
+                    // Update page close button if it exists
+                    if (pageCloseBtn) {
+                        pageCloseBtn.style.right = rightOffset + 'px';
+                    }
+                    
+                    // Update video close button if it exists
+                    if (videoCloseBtn) {
+                        videoCloseBtn.style.right = rightOffset + 'px';
+                    }
+                    
+                    console.log('Theme rect:', themeRect, 'Right offset:', rightOffset);
+                }, 10);
+            }
+        }
+        
+        // Update position on window resize
+        window.addEventListener('resize', updateCloseButtonPosition);
         
         function closePageContent() {
             const pageContentOverlay = document.getElementById('page-content-overlay');
@@ -2035,6 +2618,7 @@
             // Close video overlays
             const videoLayoutContainer = document.getElementById('video-layout-container');
             const video = document.getElementById('irl-video-player');
+            const videoOverlay = document.getElementById('irl-video-overlay');
             const chatContainer = document.getElementById('chat-container');
             const navBar = document.querySelector('.navigation-bar');
             
@@ -2046,12 +2630,21 @@
                 }
                 videoLayoutContainer.classList.remove('active');
                 if (chatContainer) {
-                    document.body.appendChild(chatContainer);
                     chatContainer.classList.remove('video-content-active');
                 }
                 if (navBar) {
                     navBar.classList.remove('video-active');
                 }
+            }
+            
+            // Clear video overlay content (fixes MAL content persistence bug)
+            if (videoOverlay) {
+                videoOverlay.innerHTML = `
+                    <video id="irl-video-player" controls>
+                        <source src="./assets/video/IRL.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                `;
             }
             
             // Close page content overlays
@@ -2159,27 +2752,27 @@
                             <div class="page-section-title">Our Team</div>
                             <div class="team-grid">
                                 <div class="info-box team-member">
-                                    <div class="team-photo">[Photo]</div>
+                                    <div class="team-photo"><img src="assets/images/kai-photo.jpg" alt="Kai Henry" /></div>
                                     <div class="team-info">
                                         <h3>Kai Henry</h3>
                                         <p class="role">CEO</p>
-                                        <p>Leading Fewture Studios as a co-founder engine for creators, building and scaling creator-led companies.</p>
+                                        <p>Powering Fewture as a co-founder to creators, leads the charge in transforming cultural influence into scalable, creator-led enterprises.</p>
                                     </div>
                                 </div>
                                 <div class="info-box team-member">
-                                    <div class="team-photo">[Photo]</div>
+                                    <div class="team-photo"><img src="assets/images/josh-photo.jpg" alt="Josh Stein" /></div>
                                     <div class="team-info">
                                         <h3>Josh Stein</h3>
                                         <p class="role">President & COO</p>
-                                        <p>Driving operations and media strategy across Studios, Fund, and IRL initiatives.</p>
+                                        <p>Driving the Fewture ecosystem, architects businesses, engineers scalable systems, and operationalizes ventures from vision to execution.</p>
                                     </div>
                                 </div>
                                 <div class="info-box team-member">
-                                    <div class="team-photo">[Photo]</div>
+                                    <div class="team-photo"><img src="assets/images/brandon-photo.jpeg" alt="Brandon Dalton" /></div>
                                     <div class="team-info">
                                         <h3>Brandon Dalton</h3>
                                         <p class="role">Chief Attention Officer</p>
-                                        <p>Leading creative vision and IP development, including the Internet Racing League.</p>
+                                        <p>As tastemaker-in-chief, leads creative and IP development, channeling culture, talent, and attention into businesses that scale.</p>
                                     </div>
                                 </div>
                             </div>
@@ -2213,19 +2806,19 @@
                             <div class="page-section-title">Get In Touch</div>
                             <div class="info-box">
                                 <h3>General Inquiries</h3>
-                                <p>Ready to collaborate on your next digital project? Let's connect and explore possibilities.</p>
+                                <p>Ready to collaborate on your next digital project? Contact us at hello@fewture.co</p>
                             </div>
                             <div class="info-box">
                                 <h3>Business Development</h3>
-                                <p>Partnership opportunities and strategic collaboration discussions.</p>
+                                <p>Partnership opportunities and strategic collaboration discussions. Reach out to hello@fewture.co</p>
                             </div>
                             <div class="info-box">
                                 <h3>Office Locations</h3>
-                                <p>Silicon Valley headquarters with global remote team collaboration.</p>
+                                <p>Los Angeles headquarters with global remote team collaboration.</p>
                             </div>
                             <div class="info-box">
                                 <h3>Social Media</h3>
-                                <p>Follow our journey and latest updates across digital platforms.</p>
+                                <p>Follow our journey: @fewturestudios on Instagram, Twitter/X, and TikTok for latest updates and behind-the-scenes content.</p>
                             </div>
                         </div>
                     `;
@@ -2276,18 +2869,26 @@
             switch(project) {
                 case 'irl':
                     switchMode('dark');
+                    updateThemeIndicator('IRL');
+                    currentThemeIndex = 1;
                     showIRLVideo();
                     break;
                 case 'willie':
                     switchMode('red');
+                    updateThemeIndicator('Willie');
+                    currentThemeIndex = 2;
                     showWillieVideo();
                     break;
                 case 'fund':
                     switchMode('green');
+                    updateThemeIndicator('Fund');
+                    currentThemeIndex = 3;
                     showFundVideo();
                     break;
                 case 'mal':
                     switchMode('purple');
+                    updateThemeIndicator('MAL');
+                    currentThemeIndex = 4;
                     showMalContent();
                     break;
                 default:
@@ -2295,94 +2896,243 @@
             }
         }
         
+        function updateThemeIndicator(themeName) {
+            const indicator = document.getElementById('current-theme');
+            if (indicator) {
+                indicator.textContent = themeName;
+            }
+        }
+        
+        function updateThemeIndicatorFromMode(mode) {
+            // Map mode to theme name and update current theme index
+            let themeName = 'Default';
+            let themeIndex = 0;
+            
+            switch(mode) {
+                case 'dark':
+                    themeName = 'IRL';
+                    themeIndex = 1;
+                    break;
+                case 'red':
+                    themeName = 'Willie';
+                    themeIndex = 2;
+                    break;
+                case 'green':
+                    themeName = 'Fund';
+                    themeIndex = 3;
+                    break;
+                case 'purple':
+                    themeName = 'MAL';
+                    themeIndex = 4;
+                    break;
+                default:
+                    themeName = 'Default';
+                    themeIndex = 0;
+            }
+            
+            currentThemeIndex = themeIndex;
+            updateThemeIndicator(themeName);
+        }
+        
+        let currentThemeIndex = 0;
+        const themes = [
+            { name: 'Default', mode: 'default' },
+            { name: 'IRL', mode: 'dark' },
+            { name: 'Willie', mode: 'red' },
+            { name: 'Fund', mode: 'green' },
+            { name: 'MAL', mode: 'purple' }
+        ];
+        
+        function cycleTheme() {
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            const theme = themes[currentThemeIndex];
+            switchMode(theme.mode);
+            updateThemeIndicator(theme.name);
+        }
+        
         // Make functions globally accessible
         window.toggleProjectsDropdown = toggleProjectsDropdown;
         window.switchToProject = switchToProject;
         window.showMalContent = showMalContent;
+        window.cycleTheme = cycleTheme;
         
         function showMalContent() {
-            console.log('Showing MAL Content');
-            
             // Close any existing overlays first
             closeAllOverlays();
             
-            const pageContentOverlay = document.getElementById('page-content-overlay');
-            const videoBackground = document.getElementById('video-background-overlay');
-            const pageContent = document.getElementById('page-content');
+            const videoLayoutContainer = document.getElementById('video-layout-container');
+            const video = document.getElementById('irl-video-player');
+            const videoSource = video ? video.querySelector('source') : null;
+            const chatContainer = document.getElementById('chat-container');
             const navBar = document.querySelector('.navigation-bar');
             
             // Set current overlay type
-            currentOverlayType = 'page';
+            currentOverlayType = 'video';
             
-            // Generate MAL content using page content system
-            pageContent.innerHTML = `
-                <div class="page-content-header">
-                    <h1>MAL WAR[3]</h1>
-                    <button class="close-btn" onclick="closePageContent()">×</button>
-                </div>
-                
-                <div class="page-content-body">
-                    <div class="profile-section">
-                        <div class="profile-image">
-                            <div class="image-placeholder">[MAL PROFILE IMAGE]</div>
+            // Configure video for MAL content (hide video, show containers)
+            if (videoSource) {
+                videoSource.src = '';
+            }
+            video.style.display = 'none';
+            
+            // Show video layout container
+            videoLayoutContainer.classList.add('active');
+            
+            // Move chat into video layout
+            if (chatContainer) {
+                videoLayoutContainer.appendChild(chatContainer);
+                chatContainer.classList.add('video-content-active');
+            }
+            
+            // Create MAL content in the video overlay area
+            const videoOverlay = document.getElementById('irl-video-overlay');
+            videoOverlay.innerHTML = `
+                <div class="mal-content-grid">
+                    <div class="mal-profile">
+                        <h2>MAL WAR[3]</h2>
+                        <div class="mal-photo">
+                            <img src="./assets/images/mal-photo.jpg" alt="Mal Warxhaj" />
                         </div>
-                        
-                        <div class="profile-details">
-                            <h2>Mal Warxhaj</h2>
-                            <div class="profile-subtitle">Age: 25 | Origin: Durrës, Albania | Base: Downtown LA</div>
-                            <div class="profile-tagline">"Threading Tomorrow"</div>
-                        </div>
+                        <h3>Mal Warxhaj</h3>
+                        <div class="profile-subtitle">Age: 25 | Origin: Durrës, Albania | Base: Downtown LA</div>
+                        <div class="profile-tagline">"Threading Tomorrow"</div>
                     </div>
                     
-                    <div class="content-section">
-                        <h3>Background</h3>
-                        <p>Mal Warxhaj, 25, has already stitched together a cross-continental story as bold as her handmade wardrobe. Raised in coastal Durrës, Albania, she learned couture fundamentals from her mother and grandmother—drafting patterns on kitchen tables and embroidering folkloric motifs by candleight.</p>
-                        
-                        <p>Landing in Downtown LA, she settled into a tiny loft above the arts district and took a barista job at Il Caffé, the unofficial clubhouse for fashion renegades, indie musicians, underground party promoters, and crypto futurists. Between espresso pulls she traded style hacks for song demos, outfitting new friends in one-of-a-kind pieces while live-streaming the process.</p>
-                        
-                        <h3>Digital Identity</h3>
-                        <p>Her feed quickly became a mash-up of Albanian folk embroidery, avant-street silhouettes, and performance-art vignettes scored to Balkan-infused hyper-pop—earning her a rapidly growing global audience hungry for heritage reimagined through Gen-Z eyes.</p>
-                        
-                        <h3>Current Operations</h3>
-                        <p>Today, she fronts micro-collections on Depop before they hit IRL pop-ups, DJ's curatorial sets at warehouse galleries, and collaborates with Web3 collectives to tokenize limited-edition garments. Equal parts designer, digital storyteller, and cultural bridge-builder, Mal is proof that in LA's new creative economy, the loom, the lens, and the algorithm can all share the same runway.</p>
-                        
-                        <div class="capabilities-grid">
-                            <div class="capability-item">
-                                <h4>Digital Identity</h4>
-                                <p>Hyper-real 3D avatar (Metahuman rig)<br>Voice model (Balkan-infused vocals)</p>
-                            </div>
-                            <div class="capability-item">
-                                <h4>Content Creation</h4>
-                                <p>Fashion-as-Performance<br>Live-stitched one-off garments<br>Balkan-hyper-pop mixes + AI stems</p>
-                            </div>
-                            <div class="capability-item">
-                                <h4>Web3 Operations</h4>
-                                <p>Tokenized wearables & garment NFTs<br>ERC-6551 token-bound accounts</p>
-                            </div>
-                            <div class="capability-item">
-                                <h4>Community Network</h4>
-                                <p>"Warp & Weft" Discord roles<br>Weekly pattern drops → user remixes</p>
-                            </div>
-                        </div>
-                        
-                        <div class="tech-stack">
-                            <h3>Tech Stack</h3>
-                            <ul>
-                                <li>Unreal Metahuman + Live Link Face</li>
-                                <li>Stable-Diffusion textile ideation</li>
-                                <li>Voice-cloning & AI music generators</li>
-                                <li>ERC-6551 "token-bound accounts" for garments</li>
-                            </ul>
-                        </div>
+                    <div class="mal-background">
+                        <h4>Background</h4>
+                        <p>Mal Warxhaj, 25, has already stitched together a cross-continental story as bold as her handmade wardrobe. Raised in coastal Durrës, Albania, she learned couture fundamentals from her mother and grandmother.</p>
+                        <p>Landing in Downtown LA, she settled into a tiny loft above the arts district and took a barista job at Il Caffé, the unofficial clubhouse for fashion renegades.</p>
+                    </div>
+                    
+                    <div class="mal-digital">
+                        <h4>Digital Identity</h4>
+                        <p>Her feed quickly became a mash-up of Albanian folk embroidery, avant-street silhouettes, and performance-art vignettes scored to Balkan-infused hyper-pop.</p>
+                        <h5>Tech Stack</h5>
+                        <p>Hyper-real 3D avatar (Metahuman rig)<br/>Voice model (Balkan-infused vocals)</p>
+                    </div>
+                    
+                    <div class="mal-operations">
+                        <h4>Current Operations</h4>
+                        <p>Today, she fronts micro-collections on Depop before they hit IRL pop-ups, DJ's curatorial sets at warehouse galleries, and collaborates with Web3 collectives.</p>
+                        <h5>Web3 Operations</h5>
+                        <p>Tokenized wearables & garment NFTs<br/>ERC-6551 token-bound accounts</p>
                     </div>
                 </div>
             `;
             
-            // Show page content overlay and background
-            pageContentOverlay.classList.add('active');
-            videoBackground.classList.add('active');
+            // Transition navigation
+            navBar.classList.add('video-active');
+            
+            // Zoom camera closer to 3D object
+            zoomCameraToObject();
+        }
+        
+        // Floating container creation function
+        function createFloatingContainer(containerData) {
+            // Remove existing container if it exists
+            const existingContainer = document.getElementById(containerData.id);
+            if (existingContainer) {
+                existingContainer.remove();
+            }
+            
+            // Create container element
+            const container = document.createElement('div');
+            container.id = containerData.id;
+            container.className = `floating-container size-${containerData.size}`;
+            
+            // Set position
+            Object.keys(containerData.position).forEach(key => {
+                container.style[key] = containerData.position[key];
+            });
+            
+            // Create content
+            container.innerHTML = `
+                <div class="container-content">
+                    <div class="container-title">${containerData.title}</div>
+                    ${containerData.content}
+                </div>
+            `;
+            
+            // Add to body
+            document.body.appendChild(container);
+            
+            // Animate in after a short delay
+            setTimeout(() => {
+                container.classList.add('active');
+            }, 100);
+            
+            return container;
+        }
+        
+        // Function to clear all floating containers
+        function clearFloatingContainers() {
+            const containers = document.querySelectorAll('.floating-container');
+            containers.forEach(container => {
+                container.classList.remove('active');
+                setTimeout(() => {
+                    container.remove();
+                }, 400);
+            });
+            
+            // Set current overlay type
+            currentOverlayType = 'floating';
+            
+            // Create floating containers for MAL project
+            const malContainers = [
+                {
+                    id: 'mal-profile',
+                    title: 'MAL WAR[3]',
+                    content: `
+                        <h2>Mal Warxhaj</h2>
+                        <div style="font-size: 12px; margin: 5px 0;">Age: 25 | Origin: Durrës, Albania | Base: Downtown LA</div>
+                        <div style="font-style: italic; margin: 5px 0;">"Threading Tomorrow"</div>
+                    `,
+                    size: 'medium',
+                    position: { top: '15%', right: '20%' }
+                },
+                {
+                    id: 'mal-background',
+                    title: 'Background',
+                    content: `
+                        <p>Mal Warxhaj, 25, has already stitched together a cross-continental story as bold as her handmade wardrobe. Raised in coastal Durrës, Albania, she learned couture fundamentals from her mother and grandmother.</p>
+                        <p>Landing in Downtown LA, she settled into a tiny loft above the arts district and took a barista job at Il Caffé, the unofficial clubhouse for fashion renegades.</p>
+                    `,
+                    size: 'large',
+                    position: { top: '25%', left: '15%' }
+                },
+                {
+                    id: 'mal-digital',
+                    title: 'Digital Identity',
+                    content: `
+                        <p>Her feed quickly became a mash-up of Albanian folk embroidery, avant-street silhouettes, and performance-art vignettes scored to Balkan-infused hyper-pop.</p>
+                        <h4>Tech Stack</h4>
+                        <p>Hyper-real 3D avatar (Metahuman rig)<br/>Voice model (Balkan-infused vocals)</p>
+                    `,
+                    size: 'small',
+                    position: { top: '60%', right: '25%' }
+                },
+                {
+                    id: 'mal-operations',
+                    title: 'Current Operations',
+                    content: `
+                        <p>Today, she fronts micro-collections on Depop before they hit IRL pop-ups, DJ's curatorial sets at warehouse galleries, and collaborates with Web3 collectives.</p>
+                        <h4>Web3 Operations</h4>
+                        <p>Tokenized wearables & garment NFTs<br/>ERC-6551 token-bound accounts</p>
+                    `,
+                    size: 'medium',
+                    position: { bottom: '20%', left: '20%' }
+                }
+            ];
+            
+            // Create and display floating containers with staggered animation
+            malContainers.forEach((container, index) => {
+                setTimeout(() => {
+                    createFloatingContainer(container);
+                }, index * 200);
+            });
             
             // Transition navigation
+            const navBar = document.querySelector('.navigation-bar');
             navBar.classList.add('video-active');
             
             // Zoom camera closer to 3D object
@@ -2513,30 +3263,30 @@
             if (mode === 'dark') {
                 body.classList.add('dark-mode');
                 currentMode = 'dark';
-                renderer.setClearColor(0x000000); // Black background
-                scene.background = new THREE.Color(0x000000);
-                scene.fog = new THREE.FogExp2(0x000000, 0.035);
+                renderer.setClearColor(0x1a1a1a); // Softer dark background
+                scene.background = new THREE.Color(0x1a1a1a);
+                scene.fog = new THREE.FogExp2(0x1a1a1a, 0.035);
                 update3DObjectStyling('dark');
             } else if (mode === 'red') {
                 body.classList.add('red-mode');
                 currentMode = 'red';
-                renderer.setClearColor(0x330000); // Dark red background
-                scene.background = new THREE.Color(0x330000);
-                scene.fog = new THREE.FogExp2(0x330000, 0.035);
+                renderer.setClearColor(0x4d3333); // Softer dark red background
+                scene.background = new THREE.Color(0x4d3333);
+                scene.fog = new THREE.FogExp2(0x4d3333, 0.035);
                 update3DObjectStyling('red');
             } else if (mode === 'green') {
                 body.classList.add('green-mode');
                 currentMode = 'green';
-                renderer.setClearColor(0x2d3e2d); // Muted sage green background
-                scene.background = new THREE.Color(0x2d3e2d);
-                scene.fog = new THREE.FogExp2(0x2d3e2d, 0.025);
+                renderer.setClearColor(0x3d4d3d); // Softer sage green background
+                scene.background = new THREE.Color(0x3d4d3d);
+                scene.fog = new THREE.FogExp2(0x3d4d3d, 0.025);
                 update3DObjectStyling('green');
             } else if (mode === 'purple') {
                 body.classList.add('purple-mode');
                 currentMode = 'purple';
-                renderer.setClearColor(0x4a3c5a); // Pale purple background
-                scene.background = new THREE.Color(0x4a3c5a);
-                scene.fog = new THREE.FogExp2(0x4a3c5a, 0.03);
+                renderer.setClearColor(0x5a4d6a); // Softer purple background
+                scene.background = new THREE.Color(0x5a4d6a);
+                scene.fog = new THREE.FogExp2(0x5a4d6a, 0.03);
                 update3DObjectStyling('purple');
             } else {
                 currentMode = 'light';
@@ -2551,6 +3301,9 @@
             // Update status overlays
             updateStatusOverlays();
             
+            // Update theme indicator based on current mode
+            updateThemeIndicatorFromMode(mode);
+            
             // Remove transition class after animation
             setTimeout(() => {
                 body.classList.remove('mode-transition');
@@ -2558,80 +3311,23 @@
         }
 
         function createColorTransition(mode) {
-            // Remove any existing transition overlay
-            const existingOverlay = document.querySelector('.color-transition-overlay');
-            if (existingOverlay) {
-                existingOverlay.remove();
-            }
-
-            // Create new transition overlay
-            const overlay = document.createElement('div');
-            overlay.className = 'color-transition-overlay';
+            // Subtle transition without overlay - just apply CSS transition class
+            const body = document.body;
+            body.classList.add('mode-transition');
             
-            // Set color based on mode
-            let color;
-            switch(mode) {
-                case 'dark':
-                    color = 'rgba(0, 0, 0, 0.9)';
-                    break;
-                case 'red':
-                    color = 'rgba(51, 0, 0, 0.9)';
-                    break;
-                case 'green':
-                    color = 'rgba(45, 62, 45, 0.9)';
-                    break;
-                case 'purple':
-                    color = 'rgba(74, 60, 90, 0.9)';
-                    break;
-                default:
-                    color = 'rgba(245, 245, 245, 0.9)';
-            }
-            
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: -100%;
-                width: 200%;
-                height: 100%;
-                background: linear-gradient(90deg, transparent 0%, ${color} 40%, ${color} 60%, transparent 100%);
-                z-index: 9998;
-                pointer-events: none;
-                transition: left 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            `;
-            
-            document.body.appendChild(overlay);
-            
-            // Animate wipe from left to right
-            requestAnimationFrame(() => {
-                overlay.style.left = '100%';
-            });
-            
-            // Remove after animation completes
+            // Remove transition class after animation
             setTimeout(() => {
-                if (overlay.parentNode) {
-                    overlay.remove();
-                }
-            }, 1200);
+                body.classList.remove('mode-transition');
+            }, 500);
         }
 
         function updateStatusOverlays() {
-            // Navigation overlays maintain their labels but can change styling based on mode
+            // Navigation overlays maintain their labels but keep black styling
             const overlays = document.querySelectorAll('.status-overlay');
             overlays.forEach(overlay => {
-                // Keep original navigation text but update styling based on current mode
-                if (currentMode === 'dark') {
-                    overlay.style.borderColor = 'rgba(255, 255, 255, 0.6)';
-                    overlay.style.color = '#ffffff';
-                } else if (currentMode === 'red') {
-                    overlay.style.borderColor = 'rgba(255, 0, 0, 0.8)';
-                    overlay.style.color = '#ff0000';
-                } else if (currentMode === 'green') {
-                    overlay.style.borderColor = 'rgba(127, 176, 105, 0.8)';
-                    overlay.style.color = '#7fb069';
-                } else {
-                    overlay.style.borderColor = 'rgba(255, 255, 255, 0.6)';
-                    overlay.style.color = '#ffffff';
-                }
+                // Remove any inline styles to let CSS take over
+                overlay.style.borderColor = '';
+                overlay.style.color = '';
             });
         }
 
@@ -3254,6 +3950,7 @@
         // Make functions globally accessible
         window.showPageContent = showPageContent;
         window.closePageContent = closePageContent;
+        window.updateCloseButtonPosition = updateCloseButtonPosition;
 
     </script>
 </body>
