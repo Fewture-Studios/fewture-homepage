@@ -361,18 +361,14 @@ def serve_website_file(event):
         s3_key = path.lstrip('/')
         
         try:
-            # For large video files, redirect to S3 pre-signed URL to avoid Lambda 6MB limit
+            # For large video files, redirect to S3 HTTPS endpoint to avoid Lambda 6MB limit and mixed content issues
             if s3_key.endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm')):
-                # Generate pre-signed URL for video files
-                presigned_url = s3_client.generate_presigned_url(
-                    'get_object',
-                    Params={'Bucket': bucket_name, 'Key': s3_key},
-                    ExpiresIn=3600  # 1 hour expiration
-                )
+                # Use S3 HTTPS endpoint for video files to avoid mixed content blocking on HTTPS sites
+                s3_https_url = f'https://{bucket_name}.s3.amazonaws.com/{s3_key}'
                 return {
                     'statusCode': 302,
                     'headers': {
-                        'Location': presigned_url,
+                        'Location': s3_https_url,
                         'Cache-Control': 'public, max-age=3600'
                     },
                     'body': ''

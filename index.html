@@ -2939,15 +2939,15 @@
                             <div class="page-section-title">About Fewture</div>
                             <div class="info-box">
                                 <h3>Fewture Studios</h3>
-                                <p>A co-founder engine for creators. We conceive, build, and scale creator-led companies by offering company design, team building, go-to-market strategy, and financing. Moving at internet speed while staying fluent in culture.</p>
+                                <p>A venture studio turning creators into founders. We design, build, and scale creator-led companies across IP, consumer products, and technology—bringing strategy, teams, and capital under one roof. Moving at internet speed and fluent in culture, Fewture is the engine behind the next generation of category-defining companies.</p>
                             </div>
                             <div class="info-box">
                                 <h3>Fewture Fund</h3>
-                                <p>Early-stage capital arm targeting $50M with ~75 investments. Focus on Pre-seed to Seed rounds with $500k–$1.5M checks. Investment mix: Live IP (40%), Consumer Products (30%), Tech/Tools (20%).</p>
+                                <p>The investment arm of Fewture, backing the infrastructure of the attention economy. We invest early in creator-led IP, consumer products, and technology that blend cultural relevance with commercial scale. More than capital, we bring asymmetric insight, distribution, and operating expertise to help creators build enduring companies.</p>
                             </div>
                             <div class="info-box">
                                 <h3>Internet Racing League (IRL)</h3>
-                                <p>Flagship live IP combining kart-based motorsport with creator culture. Global karting league across LATAM, USA, EU, and MENA regions, culminating in the 2026 IRL Money Cup with $1M prize pool at SoFi Stadium.</p>
+                                <p>The first internet-native motorsport series—where creators, culture, and competition collide. Built on karting, the foundation of modern racing, IRL launches as a global league, culminating in the IRL Money Cup. A flagship live IP redefining what sports entertainment looks like in the creator era.</p>
                             </div>
                         </div>
                     `;
@@ -2992,19 +2992,19 @@
                             <div class="page-section-title">Partners & Collaborators</div>
                             <div class="info-box">
                                 <h3>Creator Partners</h3>
-                                <p>Working with top creators and streamers to build creator-led companies and develop live IP experiences like the Internet Racing League.</p>
+                                <p>We work alongside top creators and streamers to build ventures and launch live IP experiences like the Internet Racing League.</p>
                             </div>
                             <div class="info-box">
                                 <h3>Investment Partners</h3>
-                                <p>Collaborating with LPs and co-investors on our $50M fund targeting pre-seed to seed stage creator economy and live IP investments.</p>
+                                <p>We team with LPs and co-investors through Fewture Fund to back creator-led IP, consumer products, and technology at the earliest stages.</p>
                             </div>
                             <div class="info-box">
                                 <h3>Media & Platform Partners</h3>
-                                <p>Partnering with streaming platforms, social media networks, and media companies to amplify creator-led content and live events.</p>
+                                <p>We collaborate with platforms and media networks to amplify creator-led IP and live cultural events.</p>
                             </div>
                             <div class="info-box">
                                 <h3>Motorsport & Venue Partners</h3>
-                                <p>Working with karting facilities, racing organizations, and major venues like SoFi Stadium to deliver world-class IRL racing experiences.</p>
+                                <p>We partner with karting facilities, racing organizations, and global to deliver world-class IRL experiences.</p>
                             </div>
                         </div>
                     `;
@@ -3049,11 +3049,19 @@
             const dropdown = document.getElementById('projects-dropdown-menu');
             dropdown.classList.toggle('show');
             
-            // Close dropdown when clicking outside
+            // Close dropdown when clicking outside or on any interaction
             if (dropdown.classList.contains('show')) {
                 document.addEventListener('click', closeDropdownOnClickOutside);
+                document.addEventListener('wheel', closeDropdownOnScroll, true);
+                document.addEventListener('touchmove', closeDropdownOnScroll, true);
+                document.addEventListener('keydown', closeDropdownOnScroll, true);
+                document.addEventListener('mousemove', closeDropdownOnMouseMove, true);
             } else {
                 document.removeEventListener('click', closeDropdownOnClickOutside);
+                document.removeEventListener('wheel', closeDropdownOnScroll, true);
+                document.removeEventListener('touchmove', closeDropdownOnScroll, true);
+                document.removeEventListener('keydown', closeDropdownOnScroll, true);
+                document.removeEventListener('mousemove', closeDropdownOnMouseMove, true);
             }
         }
         
@@ -3062,16 +3070,52 @@
             const projectsButton = document.querySelector('.projects-dropdown');
             
             if (!projectsButton.contains(event.target)) {
-                dropdown.classList.remove('show');
-                document.removeEventListener('click', closeDropdownOnClickOutside);
+                closeProjectsDropdown();
             }
+        }
+        
+        function closeDropdownOnScroll(event) {
+            closeProjectsDropdown();
+        }
+        
+        let mouseMoveTimeout;
+        function closeDropdownOnMouseMove(event) {
+            const dropdown = document.getElementById('projects-dropdown-menu');
+            const projectsButton = document.querySelector('.projects-dropdown');
+            
+            // Clear previous timeout
+            clearTimeout(mouseMoveTimeout);
+            
+            // Only close if mouse moves away from dropdown area
+            const dropdownRect = projectsButton.getBoundingClientRect();
+            const buffer = 50; // 50px buffer around dropdown
+            
+            if (event.clientX < dropdownRect.left - buffer ||
+                event.clientX > dropdownRect.right + buffer ||
+                event.clientY < dropdownRect.top - buffer ||
+                event.clientY > dropdownRect.bottom + buffer) {
+                
+                // Delay closing to prevent accidental closure
+                mouseMoveTimeout = setTimeout(() => {
+                    closeProjectsDropdown();
+                }, 500);
+            }
+        }
+        
+        function closeProjectsDropdown() {
+            const dropdown = document.getElementById('projects-dropdown-menu');
+            dropdown.classList.remove('show');
+            document.removeEventListener('click', closeDropdownOnClickOutside);
+            document.removeEventListener('wheel', closeDropdownOnScroll, true);
+            document.removeEventListener('touchmove', closeDropdownOnScroll, true);
+            document.removeEventListener('keydown', closeDropdownOnScroll, true);
+            document.removeEventListener('mousemove', closeDropdownOnMouseMove, true);
+            clearTimeout(mouseMoveTimeout);
         }
         
         function switchToProject(project) {
             // Close dropdown first
-            const dropdown = document.getElementById('projects-dropdown-menu');
-            dropdown.classList.remove('show');
-            document.removeEventListener('click', closeDropdownOnClickOutside);
+            closeProjectsDropdown();
             
             // Switch to the appropriate project with proper mode switching
             switch(project) {
