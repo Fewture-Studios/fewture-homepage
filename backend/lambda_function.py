@@ -2,6 +2,8 @@ import json
 import requests
 import os
 import time
+import boto3
+from botocore.exceptions import ClientError
 
 def lambda_handler(event, context):
     """
@@ -29,13 +31,18 @@ def lambda_handler(event, context):
         
         if 'requestContext' in event and 'elb' in event['requestContext']:
             # ALB event format
+            
+            # Handle GET requests for website files
+            if event.get('httpMethod') == 'GET':
+                return serve_website_file(event)
+            
             if event.get('httpMethod') != 'POST':
                 return {
                     'statusCode': 405,
                     'headers': {
                         'Access-Control-Allow-Origin': '*',
                         'Access-Control-Allow-Headers': 'Content-Type',
-                        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+                        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
                     },
                     'body': json.dumps({'error': 'Method not allowed'})
                 }
@@ -333,6 +340,100 @@ def generate_actions(user_message, ai_reply, user_context, user_info):
         })
     
     return actions
+
+def serve_website_file(event):
+    """
+    Serve website files from S3 bucket
+    """
+    try:
+        # Initialize S3 client
+        s3_client = boto3.client('s3')
+        bucket_name = 'fewture-homepage-prod'
+        
+        # Get the requested path
+        path = event.get('path', '/')
+        if path == '/':
+            path = '/index.html'
+        elif not path.startswith('/'):
+            path = '/' + path
+        
+        # Remove leading slash for S3 key
+        s3_key = path.lstrip('/')
+        
+        try:
+            # Get file from S3
+            response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
+            content = response['Body'].read()
+            content_type = response.get('ContentType', 'application/octet-stream')
+            
+            # Set proper content type based on file extension if not set
+            if content_type == 'application/octet-stream':
+                if s3_key.endswith('.glb'):
+                    content_type = 'model/gltf-binary'
+                elif s3_key.endswith('.gltf'):
+                    content_type = 'model/gltf+json'
+                elif s3_key.endswith('.js'):
+                    content_type = 'application/javascript'
+                elif s3_key.endswith('.css'):
+                    content_type = 'text/css'
+                elif s3_key.endswith('.html'):
+                    content_type = 'text/html'
+                elif s3_key.endswith('.json'):
+                    content_type = 'application/json'
+                elif s3_key.endswith(('.jpg', '.jpeg')):
+                    content_type = 'image/jpeg'
+                elif s3_key.endswith('.png'):
+                    content_type = 'image/png'
+                elif s3_key.endswith('.gif'):
+                    content_type = 'image/gif'
+                elif s3_key.endswith('.svg'):
+                    content_type = 'image/svg+xml'
+                elif s3_key.endswith(('.mp4', '.mov')):
+                    content_type = 'video/mp4'
+            
+            # Handle text files
+            if isinstance(content, bytes):
+                if content_type.startswith('text/') or content_type == 'application/json':
+                    content = content.decode('utf-8')
+                    is_binary = False
+                else:
+                    import base64
+                    content = base64.b64encode(content).decode('utf-8')
+                    is_binary = True
+            else:
+                is_binary = False
+            
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Content-Type': content_type,
+                    'Cache-Control': 'public, max-age=3600'
+                },
+                'body': content,
+                'isBase64Encoded': is_binary
+            }
+            
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchKey':
+                # File not found, return 404
+                return {
+                    'statusCode': 404,
+                    'headers': {
+                        'Content-Type': 'text/html'
+                    },
+                    'body': '<html><body><h1>404 - File Not Found</h1></body></html>'
+                }
+            else:
+                raise e
+                
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json'
+            },
+            'body': json.dumps({'error': f'Error serving file: {str(e)}'})
+        }
 
 def extract_topic(message):
     """Extract main topic from user message"""

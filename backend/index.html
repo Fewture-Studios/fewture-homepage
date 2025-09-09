@@ -2603,8 +2603,8 @@
         const chatInput = document.getElementById('chat-input');
         const chatSend = document.getElementById('chat-send');
 
-        // API endpoint - Use HTTPS domain for production
-        const API_ENDPOINT = '/chat';
+        // API endpoint - Use ALB directly for local development (CORS enabled)
+        const API_ENDPOINT = 'http://fewture-homepage-alb-1364200841.us-east-2.elb.amazonaws.com';
 
         function addMessage(message, isUser = false) {
             addMessageToAll(message, isUser);
