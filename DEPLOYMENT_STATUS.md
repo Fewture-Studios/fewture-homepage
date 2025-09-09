@@ -59,11 +59,13 @@
 3. **Chatbot Integration**: Updated frontend API endpoint from HTTP ALB to HTTPS relative path
 4. **Lambda Code**: Enhanced with website serving and binary file support
 5. **Video Streaming**: Implemented S3 pre-signed URL redirects for large video files (bypasses Lambda 6MB limit)
+6. **CORS Configuration**: Added S3 bucket CORS rules to fix Cross-Origin Read Blocking (CORB) for video streaming
 
 ### Files Modified
 - `backend/lambda_function.py`: Added S3 proxy functionality and content-type handling
 - `index.html`: Updated API endpoint to use relative `/chat` path for HTTPS compatibility
 - Lambda deployment: Updated function code with enhanced capabilities
+- `cors-config.json`: S3 bucket CORS configuration for cross-origin video access
 
 ## Testing Results
 
